@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sunstone Transmute Profit Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .grid label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9em;
+    }
+    .grid input {
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #results {
+      margin-top: 30px;
+      background: #eef;
+      padding: 15px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Sunstone Transmute Simulator</h1>
+    <form id="sim-form">
+
+      <!-- Item Costs -->
+      <fieldset>
+        <legend><strong>Item Costs (coins each)</strong></legend>
+        <div class="grid">
+          <label>Prime Catalyst Cost:
+            <input type="number" id="cost-catalyst" value="0" min="0" step="1">
+          </label>
+          <label>Sunstone Cost:
+            <input type="number" id="cost-sunstone" value="0" min="0" step="1">
+          </label>
+          <label>Star Fragment Cost (per fragment):
+            <input type="number" id="cost-starfrag" value="0" min="0" step="0.01">
+          </label>
+          <label>Moonstone Cost:
+            <input type="number" id="cost-moonstone" value="0" min="0" step="0.01">
+          </label>
+          <label>Philo Stone Cost:
+            <input type="number" id="cost-philo" value="0" min="0" step="0.01">
+          </label>
+          <label>Alchemy Essence Cost:
+            <input type="number" id="cost-essence" value="0" min="0" step="0.01">
+          </label>
+          <label>Crate Cost:
+            <input type="number" id="cost-crate" value="0" min="0" step="0.01">
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Transmute Parameters -->
+      <fieldset style="margin-top:20px;">
+        <legend><strong>Transmute Parameters</strong></legend>
+        <div class="grid">
+          <label>Success Rate (%):
+            <input type="number" id="rate-success" value="50" min="0" max="100" step="0.1">
+          </label>
+          <label>Coin Cost per Transmute:
+            <input type="number" id="cost-coin" value="1000" min="0" step="1">
+          </label>
+          <label>Essence Drop Chance (%):
+            <input type="number" id="rate-essence" value="10" min="0" max="100" step="0.1">
+          </label>
+          <label>Crate Drop Chance (%):
+            <input type="number" id="rate-crate" value="5" min="0" max="100" step="0.1">
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Success Outcome Distribution -->
+      <fieldset style="margin-top:20px;">
+        <legend><strong>Success Outcome Distribution (%)</strong></legend>
+        <div class="grid">
+          <label>Star Fragments:
+            <input type="number" id="rate-out-star" value="25" min="0" max="100" step="0.1">
+          </label>
+          <label>Moonstone:
+            <input type="number" id="rate-out-moon" value="25" min="0" max="100" step="0.1">
+          </label>
+          <label>Sunstone:
+            <input type="number" id="rate-out-sun" value="25" min="0" max="100" step="0.1">
+          </label>
+          <label>Philo Stone:
+            <input type="number" id="rate-out-philo" value="25" min="0" max="100" step="0.1">
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Simulation Settings -->
+      <fieldset style="margin-top:20px;">
+        <legend><strong>Simulation Settings</strong></legend>
+        <div class="grid">
+          <label>Hours to Run:
+            <input type="number" id="sim-hours" value="1" min="0.01" step="0.01">
+          </label>
+          <label>Seconds per Transmute:
+            <input type="number" id="sim-time" value="3" min="0.1" step="0.1">
+          </label>
+        </div>
+      </fieldset>
+
+      <button type="button" id="run-sim">Run Simulation</button>
+    </form>
+
+    <div id="results"></div>
+  </div>
+
+
+  <script>
+    document.getElementById('run-sim').addEventListener('click', () => {
+      // Read costs
+      const cCatalyst    = parseFloat(document.getElementById('cost-catalyst').value);
+      const cSunstone    = parseFloat(document.getElementById('cost-sunstone').value);
+      const cStarFrag    = parseFloat(document.getElementById('cost-starfrag').value);
+      const cMoonstone   = parseFloat(document.getElementById('cost-moonstone').value);
+      const cPhilo       = parseFloat(document.getElementById('cost-philo').value);
+      const cEssence     = parseFloat(document.getElementById('cost-essence').value);
+      const cCrate       = parseFloat(document.getElementById('cost-crate').value);
+
+      // Transmute params
+      const rateSuccess  = parseFloat(document.getElementById('rate-success').value) / 100;
+      const costCoin     = parseFloat(document.getElementById('cost-coin').value);
+      const rateEssence  = parseFloat(document.getElementById('rate-essence').value) / 100;
+      const rateCrate    = parseFloat(document.getElementById('rate-crate').value) / 100;
+
+      // Outcome distribution
+      const rStar  = parseFloat(document.getElementById('rate-out-star').value) / 100;
+      const rMoon  = parseFloat(document.getElementById('rate-out-moon').value) / 100;
+      const rSun   = parseFloat(document.getElementById('rate-out-sun').value) / 100;
+      const rPhilo = parseFloat(document.getElementById('rate-out-philo').value) / 100;
+
+      // Normalize distribution
+      const totalOut = rStar + rMoon + rSun + rPhilo;
+      let pStar, pMoon, pSun, pPhilo;
+      if (totalOut <= 0) {
+        pStar = pMoon = pSun = pPhilo = 0.25;
+      } else {
+        pStar  = rStar  / totalOut;
+        pMoon  = rMoon  / totalOut;
+        pSun   = rSun   / totalOut;
+        pPhilo = rPhilo / totalOut;
+      }
+
+      // Simulation settings
+      const hours       = parseFloat(document.getElementById('sim-hours').value);
+      const secPerTrans = parseFloat(document.getElementById('sim-time').value);
+      const attempts    = Math.floor((hours * 3600) / secPerTrans);
+
+      // Totals & counters
+      let spentCoins       = 0;
+      let spentSunstones   = 0;
+      let spentCatalysts   = 0;
+      let cntStarFrag      = 0;
+      let cntMoonstone     = 0;
+      let cntSunstone      = 0;
+      let cntPhilo         = 0;
+      let cntEssence       = 0;
+      let cntCrate         = 0;
+
+      for (let i = 0; i < attempts; i++) {
+        // base costs
+        spentCoins     += costCoin;
+        spentSunstones += cSunstone;
+
+        // guaranteed drops
+        if (Math.random() < rateEssence) cntEssence++;
+        if (Math.random() < rateCrate)   cntCrate++;
+
+        // transmute outcome
+        if (Math.random() < rateSuccess) {
+          // spend a Prime Catalyst on success
+          spentCatalysts++;
+
+          // pick result by weighted distribution
+          const r = Math.random();
+          if (r < pStar) {
+            cntStarFrag += 10;
+          } else if (r < pStar + pMoon) {
+            cntMoonstone++;
+          } else if (r < pStar + pMoon + pSun) {
+            cntSunstone++;
+          } else {
+            cntPhilo++;
+          }
+        }
+      }
+
+      // Calculate spends & revenues
+      const spentCatalystCost = spentCatalysts * cCatalyst;
+      const totalSpent        = spentCoins + spentSunstones + spentCatalystCost;
+
+      const revStarFrag  = cntStarFrag  * cStarFrag;
+      const revMoonstone = cntMoonstone * cMoonstone;
+      const revSunstone  = cntSunstone  * cSunstone;
+      const revPhilo     = cntPhilo     * cPhilo;
+      const revEssence   = cntEssence   * cEssence;
+      const revCrate     = cntCrate     * cCrate;
+
+      const totalRev   = revStarFrag + revMoonstone + revSunstone + revPhilo + revEssence + revCrate;
+      const netProfit  = totalRev - totalSpent;
+      const profitHr   = netProfit / hours;
+      const profitTx   = netProfit / attempts;
+
+      // Display results
+      document.getElementById('results').textContent = `
+Simulation over ${hours.toFixed(2)} h (${attempts} attempts):
+
+Outputs:
+  • Star Fragments:   ${cntStarFrag}
+  • Moonstones:       ${cntMoonstone}
+  • Sunstones:        ${cntSunstone}
+  • Philo Stones:     ${cntPhilo}
+  • Essences:         ${cntEssence}
+  • Crates:           ${cntCrate}
+
+Finances:
+  • Coins Spent:           ${spentCoins.toLocaleString()}
+  • Sunstones Spent:       ${spentSunstones.toLocaleString()}
+  • Prime Catalysts Spent: ${spentCatalysts}
+  • Catalyst Cost:         ${spentCatalystCost.toLocaleString()}
+  • Total Spent:           ${totalSpent.toLocaleString()}
+
+  • Rev. Star Fragments:   ${revStarFrag.toLocaleString()}
+  • Rev. Moonstones:       ${revMoonstone.toLocaleString()}
+  • Rev. Sunstones:        ${revSunstone.toLocaleString()}
+  • Rev. Philo Stones:     ${revPhilo.toLocaleString()}
+  • Rev. Essences:         ${revEssence.toLocaleString()}
+  • Rev. Crates:           ${revCrate.toLocaleString()}
+
+  • Total Revenue:         ${totalRev.toLocaleString()}
+  • Net Profit:            ${netProfit.toLocaleString()} (${profitHr.toFixed(2)}/h, ${profitTx.toFixed(2)}/tx)
+      `.trim();
+    });
+  </script>
+
+</body>
+</html>
