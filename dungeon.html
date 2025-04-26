@@ -1,22 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Dungeon Item Prices</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dungeon Loot Values</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #eee;
+      margin: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    .highlight {
+      background-color: #2e7d32;
+    }
+    .collapsible {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .collapsible::after {
+      content: '▼';
+      float: right;
+    }
+    .active::after {
+      content: '▲';
+    }
+    .content {
+      display: none;
+      padding: 0 10px;
+      overflow: hidden;
+      background-color: #1e1e1e;
+    }
+    .toggle-button {
+      margin-bottom: 20px;
+    }
+    button {
+      background: #555;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #777;
+    }
+  </style>
 </head>
 <body>
-<h1>Dungeon Item Prices</h1>
+
+<h1>Dungeon Loot Values</h1>
+
+<div class="toggle-button">
+  <button onclick="toggleDarkMode()">Toggle Light/Dark</button>
+  <button onclick="location.reload()">Refresh</button>
+</div>
+
 <div id="average-values"></div>
 <div id="dungeon-tables"></div>
-<div class="footer">
-  Last Updated: <span id="last-updated"></span>
-</div>
-<form method="post">
-  <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
-  <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
-</form>
-<script src="dungeons_full.js"></script>
-<script src="theme_and_collapse.js"></script>
+<div id="last-updated"></div>
+
+<script>
+const dropTables = {
+  Enchanted: [
+    { name: 'Enchanted Essence', probability: 100, minQuantity: 400, maxQuantity: 800 },
+    { name: 'Enchanted Essence', probability: 5, minQuantity: 2000, maxQuantity: 4000 },
+    { name: 'Enchanted Token', probability: 100, minQuantity: 250, maxQuantity: 500 },
+    { name: 'Enchanted Token', probability: 5, minQuantity: 1500, maxQuantity: 3000 },
+    { name: 'Large Treasure Chest', probability: 30, minQuantity: 1, maxQuantity: 7 },
+    { name: 'Amethyst', probability: 60, minQuantity: 5, maxQuantity: 20 },
+    { name: 'Sunstone', probability: 50, minQuantity: 1, maxQuantity: 5 },
+    { name: 'Crippling Slash', probability: 50, minQuantity: 1, maxQuantity: 2 },
+    { name: 'Penetrating Shot', probability: 50, minQuantity: 1, maxQuantity: 2 },
+    { name: 'Arcane Reflection', probability: 50, minQuantity: 1, maxQuantity: 2 },
+    { name: 'Mana Spring', probability: 50, minQuantity: 1, maxQuantity: 2 },
+    { name: "Knight's Ingot", probability: 4, minQuantity: 1, maxQuantity: 1 },
+    { name: "Bishop's Scroll", probability: 4, minQuantity: 1, maxQuantity: 1 },
+    { name: 'Royal Cloth', probability: 4, minQuantity: 1, maxQuantity: 1 },
+    { name: 'Regal Jewel', probability: 2, minQuantity: 1, maxQuantity: 1 },
+    { name: 'Sundering Jewel', probability: 2, minQuantity: 1, maxQuantity: 1 },
+    { name: 'Enchanted Chest Key', probability: 2, minQuantity: 1, maxQuantity: 1 },
+    { name: 'Enchanted Cloak', probability: 4, minQuantity: 1, maxQuantity: 1 },
+    { name: "Knight's Aegis", probability: 0.2, minQuantity: 1, maxQuantity: 1 },
+    { name: "Bishop's Codex", probability: 0.2, minQuantity: 1, maxQuantity: 1 }
+    // Add the rest if needed
+  ]
+};
+
+const largeTreasureChest = [
+  { name: 'Coin', probability: 100, minQuantity: 30000, maxQuantity: 60000 },
+  { name: 'Coin', probability: 10, minQuantity: 150000, maxQuantity: 300000 },
+  { name: 'Pearl', probability: 60, minQuantity: 1, maxQuantity: 3 }
+  // Add the rest if needed
+];
+
+async function fetchPrices() {
+  const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
+  const data = await response.json();
+  const prices = {};
+  for (const item of data) {
+    prices[item.name] = item.price;
+  }
+  return prices;
+}
+
+function createTable(dungeon, lootTable, prices) {
+  let bestMoneyPerToken = 0;
+  let bestItem = null;
+
+  let table = `<table><thead><tr><th>Item</th><th>Quantity</th><th>Probability</th><th>Average Value</th><th>Money per Token</th></tr></thead><tbody>`;
+
+  for (const item of lootTable) {
+    const avgQty = (item.minQuantity + item.maxQuantity) / 2;
+    const price = prices[item.name] || 0;
+    const avgValue = avgQty * price * (item.probability / 100);
+
+    let moneyPerToken = '-';
+    if (item.name.includes('Token')) {
+      moneyPerToken = (price * avgQty).toFixed(2);
+      if (parseFloat(moneyPerToken) > bestMoneyPerToken) {
+        bestMoneyPerToken = parseFloat(moneyPerToken);
+        bestItem = item.name;
+      }
+    }
+
+    table += `<tr${item.name === bestItem ? ' class="highlight"' : ''}><td>${item.name}</td><td>${item.minQuantity}-${item.maxQuantity}</td><td>${item.probability}%</td><td>${avgValue.toFixed(2)}</td><td>${moneyPerToken}</td></tr>`;
+  }
+
+  table += '</tbody></table>';
+  return table;
+}
+
+async function populateTables() {
+  const prices = await fetchPrices();
+
+  let avgValuesHTML = '<h2>Average Chest Values</h2><table><thead><tr><th>Dungeon</th><th>Average Value</th></tr></thead><tbody>';
+  for (const [dungeon, table] of Object.entries(dropTables)) {
+    const avg = table.reduce((acc, item) => {
+      const avgQty = (item.minQuantity + item.maxQuantity) / 2;
+      const itemValue = (prices[item.name] || 0) * avgQty * (item.probability / 100);
+      return acc + itemValue;
+    }, 0);
+    avgValuesHTML += `<tr><td>${dungeon}</td><td>${avg.toFixed(2)}</td></tr>`;
+  }
+
+  avgValuesHTML += '</tbody></table>';
+  document.getElementById('average-values').innerHTML = avgValuesHTML;
+
+  let dungeonHTML = '';
+  for (const [dungeon, table] of Object.entries(dropTables)) {
+    dungeonHTML += `
+      <button class="collapsible" onclick="toggleCollapse(this)">${dungeon} Chest</button>
+      <div class="content">
+        ${createTable(dungeon, table, prices)}
+      </div>
+    `;
+  }
+
+  document.getElementById('dungeon-tables').innerHTML = dungeonHTML;
+
+  document.getElementById('last-updated').textContent = 'Last Updated: ' + new Date().toLocaleString();
+}
+
+function toggleCollapse(button) {
+  button.classList.toggle('active');
+  const content = button.nextElementSibling;
+  if (content.style.display === 'block') {
+    content.style.display = 'none';
+  } else {
+    content.style.display = 'block';
+  }
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle('light-mode');
+}
+
+populateTables();
+</script>
+
 </body>
 </html>
