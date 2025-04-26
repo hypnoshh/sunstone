@@ -200,7 +200,9 @@
   <label style="margin-left: 20px;"><input type="checkbox" id="include-keys" onchange="saveSettings(); fetchDataSmooth()"> Include Key Prices
     <span class="tooltip">❔<span class="tooltiptext">Subtract Chest Key and Entry Key prices from profit.</span></span>
   </label>
-  <label style="margin-left: 20px;"><input type="checkbox" id="use-median" onchange="saveSettings(); fetchDataSmooth()"> Use Median Prices</label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="use-median" onchange="saveSettings(); fetchDataSmooth()"> Use Median Price
+    <span class="tooltip">❔<span class="tooltiptext">Use the average prices over the last 24 hours</span></span>
+  </label>
 </div>
 
 <div id="warnings" class="warning">
@@ -258,7 +260,9 @@ function loadSettings() {
   document.getElementById('drop-buff').checked = getCookie('dropBuff') === 'true';
   document.getElementById('use-bid-only').checked = getCookie('useBidOnly') === 'true';
   document.getElementById('include-keys').checked = getCookie('includeKeys') === 'true';
-  document.getElementById('use-median').checked = getCookie('useMedian') === 'true';
+  const medianSetting = getCookie('useMedian');
+  document.getElementById('use-median').checked = medianSetting === '' ? true : (medianSetting === 'true');
+
   const savedRunTime = getCookie('runTime');
   if (savedRunTime) {
     document.getElementById('run-time').value = savedRunTime;
@@ -390,7 +394,16 @@ async function fetchData() {
       : formattedAverage;
 
 
-    avgHtml += `<tr><td>${dungeon}</td><td>${avgValueFormatted}${keyCostText}</td><td>${formatNumber(profitPerHour)}</td><td>${formatNumber(profitPerDay)}</td></tr>`;
+      const formattedProfitHour = profitPerHour < 0
+        ? `<span class="negative">-${formatNumber(Math.abs(profitPerHour))}</span>`
+        : formatNumber(profitPerHour);
+
+      const formattedProfitDay = profitPerDay < 0
+        ? `<span class="negative">-${formatNumber(Math.abs(profitPerDay))}</span>`
+        : formatNumber(profitPerDay);
+
+      avgHtml += `<tr><td>${dungeon}</td><td>${avgValueFormatted}${keyCostText}</td><td>${formattedProfitHour}</td><td>${formattedProfitDay}</td></tr>`;
+
   }
 
   avgHtml += '</tbody>';
