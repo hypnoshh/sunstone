@@ -361,10 +361,10 @@ function saveSettings() {
 function loadSettings() {
   document.getElementById('drop-buff').checked = getCookie('dropBuff') === 'true';
   document.getElementById('use-bid-only').checked = getCookie('useBidOnly') === 'true';
-  document.getElementById('include-keys').checked = getCookie('includeKeys') === 'true';
+  document.getElementById('include-keys').checked = getCookie('includeKeys') !== 'false';
   const medianSetting = getCookie('useMedian');
   document.getElementById('use-median').checked = medianSetting === '' ? true : (medianSetting === 'true');
-
+  
   const savedRunTime = getCookie('runTime');
   if (savedRunTime) {
     document.getElementById('run-time').value = savedRunTime;
