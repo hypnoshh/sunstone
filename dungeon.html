@@ -31,6 +31,7 @@
   }
   h1, h2 {
     color: var(--heading-color);
+    cursor: pointer;
   }
   table {
     border-collapse: collapse;
@@ -51,19 +52,10 @@
     font-weight: bold;
     border-bottom: 1px solid #30363d;
   }
-  tr:nth-child(even) {
-    background: var(--table-bg);
-  }
-  tr:nth-child(odd) {
-    background: var(--bg-color);
-  }
-  tr:hover {
-    background: var(--table-hover-bg);
-  }
-  .highlight {
-    background: var(--highlight-color) !important;
-    color: #000 !important;
-  }
+  tr:nth-child(even) { background: var(--table-bg); }
+  tr:nth-child(odd) { background: var(--bg-color); }
+  tr:hover { background: var(--table-hover-bg); }
+  .highlight { background: var(--highlight-color) !important; color: #000 !important; }
   .refresh-btn, .theme-btn {
     display: inline-block;
     padding: 10px 20px;
@@ -76,20 +68,36 @@
     margin-top: 10px;
     margin-right: 10px;
   }
-  .refresh-btn:hover, .theme-btn:hover {
-    background: #2ea043;
-  }
+  .refresh-btn:hover, .theme-btn:hover { background: #2ea043; }
   .footer {
     margin-top: 20px;
     color: #8b949e;
     font-size: 14px;
+  }
+  .collapsible {
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    text-align: left;
+    outline: none;
+    background-color: var(--heading-color);
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 5px;
+  }
+  .content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
   }
 </style>
 <script>
   function setCookie(name, value, days) {
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
-    document.cookie = name + "=" + value + ";expires=" + d.toUTCString() + ";path=/";
+    document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
   }
 
   function getCookie(name) {
@@ -97,14 +105,10 @@
     const ca = decodedCookie.split(';');
     for(let i = 0; i < ca.length; i++) {
       let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name + "=") == 0) {
-        return c.substring(name.length + 1, c.length);
-      }
+      while (c.charAt(0) == ' ') { c = c.substring(1); }
+      if (c.indexOf(name + '=') == 0) { return c.substring(name.length + 1, c.length); }
     }
-    return "";
+    return '';
   }
 
   function toggleTheme() {
@@ -199,12 +203,35 @@ async function fetchData() {
             }
         }
 
-        let html = `<h2>${dungeon}</h2><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
+        let html = `<button class="collapsible">${dungeon}</button><div class="content"><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
         for (const row of rows) {
             html += `<tr class="${row.item === bestItem ? 'highlight' : ''}"><td>${row.item}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
         }
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         container.innerHTML += html;
+    }
+
+    setupCollapsibles();
+}
+
+function setupCollapsibles() {
+    const coll = document.getElementsByClassName('collapsible');
+    for (let i = 0; i < coll.length; i++) {
+        const content = coll[i].nextElementSibling;
+        const dungeon = coll[i].innerText;
+        if (getCookie('collapse_' + dungeon) === 'open') {
+            content.style.display = 'block';
+        }
+        coll[i].addEventListener('click', function() {
+            this.classList.toggle('active');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                setCookie('collapse_' + dungeon, 'closed', 365);
+            } else {
+                content.style.display = 'block';
+                setCookie('collapse_' + dungeon, 'open', 365);
+            }
+        });
     }
 }
 
