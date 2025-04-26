@@ -237,7 +237,7 @@ async function fetchData() {
 
         let html = `<button class="collapsible">${dungeon}</button><div class="content"><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
         for (const row of rows) {
-            html += `<tr class="${row.item === bestItem ? 'highlight' : ''}"><td>${row.item}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
+            html += `<tr class="${bestItems.includes(row.item) ? 'highlight' : ''}"><td>${row.item}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
         }
         html += '</tbody></table></div>';
         container.innerHTML += html;
