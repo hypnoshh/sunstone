@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dungeon Loot Values</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #eee;
+      background-color: var(--bg);
+      color: var(--text);
       margin: 20px;
+      transition: background-color 0.3s, color 0.3s;
     }
     table {
       width: 100%;
@@ -17,103 +17,120 @@
       margin-bottom: 20px;
     }
     th, td {
-      border: 1px solid #444;
       padding: 8px;
+      border: 1px solid var(--border);
       text-align: center;
     }
     th {
-      background-color: #333;
-    }
-    .highlight {
-      background-color: #2e7d32;
+      background-color: var(--th-bg);
     }
     .collapsible {
-      background-color: #333;
-      color: white;
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
       cursor: pointer;
       padding: 10px;
       width: 100%;
       border: none;
       text-align: left;
-      outline: none;
       font-size: 18px;
+      outline: none;
       margin-top: 10px;
     }
     .collapsible::after {
-      content: '▼';
+      content: ' ▼';
       float: right;
     }
     .active::after {
-      content: '▲';
+      content: " ▲";
     }
     .content {
-      display: none;
       padding: 0 10px;
+      display: none;
       overflow: hidden;
-      background-color: #1e1e1e;
     }
-    .toggle-button {
-      margin-bottom: 20px;
+    .highlight {
+      background-color: var(--highlight);
     }
-    button {
-      background: #555;
-      color: #fff;
-      border: none;
-      padding: 10px;
+    #darkModeToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
       cursor: pointer;
-      font-size: 16px;
-      margin-right: 10px;
     }
-    button:hover {
-      background: #777;
+
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --border: #cccccc;
+      --th-bg: #f2f2f2;
+      --btn-bg: #dddddd;
+      --btn-text: #000000;
+      --highlight: #ffff99;
+    }
+    .dark {
+      --bg: #121212;
+      --text: #ffffff;
+      --border: #555555;
+      --th-bg: #333333;
+      --btn-bg: #222222;
+      --btn-text: #ffffff;
+      --highlight: #444400;
     }
   </style>
 </head>
 <body>
 
-<h1>Dungeon Loot Values</h1>
-
-<div class="toggle-button">
-  <button onclick="toggleDarkMode()">Toggle Light/Dark</button>
-  <button onclick="location.reload()">Refresh</button>
-</div>
+<h1>Dungeon Loot Value Calculator</h1>
+<button id="darkModeToggle">Toggle Light/Dark</button>
 
 <div id="average-values"></div>
 <div id="dungeon-tables"></div>
-<div id="last-updated"></div>
+<p id="last-updated"></p>
 
 <script>
 const dropTables = {
   Enchanted: [
-    { name: 'Enchanted Essence', probability: 100, minQuantity: 400, maxQuantity: 800 },
-    { name: 'Enchanted Essence', probability: 5, minQuantity: 2000, maxQuantity: 4000 },
-    { name: 'Enchanted Token', probability: 100, minQuantity: 250, maxQuantity: 500 },
-    { name: 'Enchanted Token', probability: 5, minQuantity: 1500, maxQuantity: 3000 },
-    { name: 'Large Treasure Chest', probability: 30, minQuantity: 1, maxQuantity: 7 },
-    { name: 'Amethyst', probability: 60, minQuantity: 5, maxQuantity: 20 },
-    { name: 'Sunstone', probability: 50, minQuantity: 1, maxQuantity: 5 },
-    { name: 'Crippling Slash', probability: 50, minQuantity: 1, maxQuantity: 2 },
-    { name: 'Penetrating Shot', probability: 50, minQuantity: 1, maxQuantity: 2 },
-    { name: 'Arcane Reflection', probability: 50, minQuantity: 1, maxQuantity: 2 },
-    { name: 'Mana Spring', probability: 50, minQuantity: 1, maxQuantity: 2 },
-    { name: "Knight's Ingot", probability: 4, minQuantity: 1, maxQuantity: 1 },
-    { name: "Bishop's Scroll", probability: 4, minQuantity: 1, maxQuantity: 1 },
-    { name: 'Royal Cloth', probability: 4, minQuantity: 1, maxQuantity: 1 },
-    { name: 'Regal Jewel', probability: 2, minQuantity: 1, maxQuantity: 1 },
-    { name: 'Sundering Jewel', probability: 2, minQuantity: 1, maxQuantity: 1 },
-    { name: 'Enchanted Chest Key', probability: 2, minQuantity: 1, maxQuantity: 1 },
-    { name: 'Enchanted Cloak', probability: 4, minQuantity: 1, maxQuantity: 1 },
-    { name: "Knight's Aegis", probability: 0.2, minQuantity: 1, maxQuantity: 1 },
-    { name: "Bishop's Codex", probability: 0.2, minQuantity: 1, maxQuantity: 1 }
-    // Add the rest if needed
-  ]
+    {name: 'Enchanted Essence', probability: 100, minQuantity: 400, maxQuantity: 800},
+    {name: 'Enchanted Essence', probability: 5.0, minQuantity: 2000, maxQuantity: 4000},
+    {name: 'Enchanted Token', probability: 100, minQuantity: 250, maxQuantity: 500},
+    {name: 'Enchanted Token', probability: 5.0, minQuantity: 1500, maxQuantity: 3000},
+    {name: 'Large Treasure Chest', probability: 30.0, minQuantity: 1, maxQuantity: 7},
+    {name:'Amethyst', probability: 60.0, minQuantity: 5, maxQuantity: 20},
+    {name:'Sunstone', probability: 50.0, minQuantity: 1, maxQuantity: 5},
+    {name:'Crippling Slash', probability: 50.0, minQuantity: 1, maxQuantity: 2},
+    {name:'Penetrating Shot', probability: 50.0, minQuantity: 1, maxQuantity: 2},
+    {name:'Arcane Reflection', probability: 50.0, minQuantity: 1, maxQuantity: 2},
+    {name:'Mana Spring', probability: 50.0, minQuantity: 1, maxQuantity: 2},
+    {name:'Knight\'s Ingot', probability: 4.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Bishop\'s Scroll', probability: 4.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Cloth', probability: 4.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Regal Jewel', probability: 2.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Sundering Jewel', probability: 2.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Enchanted Chest Key', probability: 2.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Enchanted Cloak', probability: 4.0, minQuantity: 1, maxQuantity: 1},
+    {name:'Knight\'s Aegis', probability: 0.2, minQuantity: 1, maxQuantity: 1},
+    {name:'Bishop\'s Codex', probability: 0.2, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Water Robe Top', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Water Robe Bottoms', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Nature Robe Top', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Nature Robe Bottoms', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Fire Robe Top', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Royal Fire Robe Bottoms', probability: 0.04, minQuantity: 1, maxQuantity: 1},
+    {name:'Regal Sword', probability: 0.05, minQuantity: 1, maxQuantity: 1},
+    {name:'Sundering Crossbow', probability: 0.05, minQuantity: 1, maxQuantity: 1},
+  ],
+  // (Sinister, Chimerical, Pirate will be filled similarly; if you want I can paste fully too.)
 };
 
 const largeTreasureChest = [
-  { name: 'Coin', probability: 100, minQuantity: 30000, maxQuantity: 60000 },
-  { name: 'Coin', probability: 10, minQuantity: 150000, maxQuantity: 300000 },
-  { name: 'Pearl', probability: 60, minQuantity: 1, maxQuantity: 3 }
-  // Add the rest if needed
+  {name: "Coin", probability: 100, minQuantity: 30000, maxQuantity: 60000},
+  {name: "Coin", probability: 10.0, minQuantity: 150000, maxQuantity: 300000},
+  {name: "Pearl", probability: 60.0, minQuantity: 1, maxQuantity: 3},
+  {name: "Amber", probability: 40, minQuantity: 1, maxQuantity: 3},
+  {name: "Garnet", probability: 40, minQuantity: 1, maxQuantity: 3},
+  {name: "Jade", probability: 40, minQuantity: 1, maxQuantity: 3},
+  {name: "Moonstone", probability: 40, minQuantity: 1, maxQuantity: 2},
 ];
 
 async function fetchPrices() {
@@ -121,9 +138,19 @@ async function fetchPrices() {
   const data = await response.json();
   const prices = {};
   for (const item of data) {
-    prices[item.name] = item.price;
+    prices[item.Name] = item.Price;
   }
   return prices;
+}
+
+function calculateAverageValue(lootTable, prices) {
+  let total = 0;
+  for (const item of lootTable) {
+    const avgQty = (item.minQuantity + item.maxQuantity) / 2;
+    const itemValue = (prices[item.name] || 0) * avgQty * (item.probability / 100);
+    total += itemValue;
+  }
+  return total;
 }
 
 function createTable(dungeon, lootTable, prices) {
@@ -158,48 +185,68 @@ async function populateTables() {
 
   let avgValuesHTML = '<h2>Average Chest Values</h2><table><thead><tr><th>Dungeon</th><th>Average Value</th></tr></thead><tbody>';
   for (const [dungeon, table] of Object.entries(dropTables)) {
-    const avg = table.reduce((acc, item) => {
-      const avgQty = (item.minQuantity + item.maxQuantity) / 2;
-      const itemValue = (prices[item.name] || 0) * avgQty * (item.probability / 100);
-      return acc + itemValue;
-    }, 0);
+    const avg = calculateAverageValue(table, prices);
     avgValuesHTML += `<tr><td>${dungeon}</td><td>${avg.toFixed(2)}</td></tr>`;
   }
-
+  const largeChestAvg = calculateAverageValue(largeTreasureChest, prices);
+  avgValuesHTML += `<tr><td>Large Treasure Chest</td><td>${largeChestAvg.toFixed(2)}</td></tr>`;
   avgValuesHTML += '</tbody></table>';
+
   document.getElementById('average-values').innerHTML = avgValuesHTML;
 
   let dungeonHTML = '';
   for (const [dungeon, table] of Object.entries(dropTables)) {
     dungeonHTML += `
-      <button class="collapsible" onclick="toggleCollapse(this)">${dungeon} Chest</button>
-      <div class="content">
+      <button class="collapsible" id="btn-${dungeon}" onclick="toggleCollapse('${dungeon}')">${dungeon} Chest</button>
+      <div class="content" id="${dungeon}" style="display: ${getCookie(dungeon) === 'expanded' ? 'block' : 'none'};">
         ${createTable(dungeon, table, prices)}
       </div>
     `;
   }
-
   document.getElementById('dungeon-tables').innerHTML = dungeonHTML;
 
-  document.getElementById('last-updated').textContent = 'Last Updated: ' + new Date().toLocaleString();
+  document.getElementById('last-updated').textContent = "Last Updated: " + new Date().toLocaleString();
 }
 
-function toggleCollapse(button) {
-  button.classList.toggle('active');
-  const content = button.nextElementSibling;
-  if (content.style.display === 'block') {
-    content.style.display = 'none';
+function toggleCollapse(id) {
+  const content = document.getElementById(id);
+  const button = document.getElementById('btn-' + id);
+  if (content.style.display === "block") {
+    content.style.display = "none";
+    button.classList.remove("active");
+    document.cookie = `${id}=collapsed; path=/`;
   } else {
-    content.style.display = 'block';
+    content.style.display = "block";
+    button.classList.add("active");
+    document.cookie = `${id}=expanded; path=/`;
   }
 }
 
-function toggleDarkMode() {
-  document.body.classList.toggle('light-mode');
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [k, v] = cookie.trim().split('=');
+    if (k === name) return v;
+  }
+  return null;
 }
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  document.cookie = `darkMode=${document.body.classList.contains('dark') ? 'on' : 'off'}; path=/`;
+}
+
+document.getElementById('darkModeToggle').onclick = toggleDarkMode;
+
+(function restoreSettings() {
+  if (getCookie('darkMode') === 'on') {
+    document.body.classList.add('dark');
+  }
+})();
 
 populateTables();
 </script>
 
 </body>
 </html>
+
