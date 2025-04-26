@@ -353,7 +353,11 @@ async function fetchData() {
     const profitPerHour = averageValue * runsPerHour * buffMultiplier;
     const profitPerDay = profitPerHour * 24;
 
-    const avgValueFormatted = averageValue < 0 ? `<span class="negative">${formatNumber(averageValue)}</span>` : formatNumber(averageValue);
+    const formattedAverage = formatNumber(Math.abs(averageValue));
+    const avgValueFormatted = averageValue < 0 
+      ? `<span class="negative">-${formattedAverage}</span>` 
+      : formattedAverage;
+
 
     avgHtml += `<tr><td>${dungeon}</td><td>${avgValueFormatted}${keyCostText}</td><td>${formatNumber(profitPerHour)}</td><td>${formatNumber(profitPerDay)}</td></tr>`;
   }
@@ -517,3 +521,4 @@ const lootTables = {
 
 </body>
 </html>
+
