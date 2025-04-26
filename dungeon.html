@@ -18,6 +18,7 @@
     --table-bg: #161b22;
     --table-header-bg: #21262d;
     --table-hover-bg: #21262d;
+    --highlight-color: #2ea043;
   }
   .light-mode {
     --bg-color: #ffffff;
@@ -26,6 +27,7 @@
     --table-bg: #f3f3f3;
     --table-header-bg: #d1d5da;
     --table-hover-bg: #e1e4e8;
+    --highlight-color: #ffd700;
   }
   h1, h2 {
     color: var(--heading-color);
@@ -49,9 +51,19 @@
     font-weight: bold;
     border-bottom: 1px solid #30363d;
   }
-  tr:nth-child(even) { background: var(--table-bg); }
-  tr:nth-child(odd) { background: var(--bg-color); }
-  tr:hover { background: var(--table-hover-bg); }
+  tr:nth-child(even) {
+    background: var(--table-bg);
+  }
+  tr:nth-child(odd) {
+    background: var(--bg-color);
+  }
+  tr:hover {
+    background: var(--table-hover-bg);
+  }
+  .highlight {
+    background: var(--highlight-color) !important;
+    color: #000 !important;
+  }
   .refresh-btn, .theme-btn {
     display: inline-block;
     padding: 10px 20px;
@@ -73,103 +85,130 @@
     font-size: 14px;
   }
 </style>
+<script>
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + value + ";expires=" + d.toUTCString() + ";path=/";
+  }
+
+  function getCookie(name) {
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name + "=") == 0) {
+        return c.substring(name.length + 1, c.length);
+      }
+    }
+    return "";
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
+  }
+
+  window.onload = function() {
+    if (getCookie('theme') === 'light') {
+      document.body.classList.add('light-mode');
+    }
+  }
+</script>
 </head>
 <body>
 
 <h1>Dungeon Item Prices</h1>
-<div id="content"></div>
-<div class="footer" id="lastUpdated"></div>
 
-<button class="refresh-btn" onclick="fetchData()">Refresh</button>
-<button class="theme-btn" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+<div id="dungeon-tables"></div>
+
+<div class="footer">
+  Last Updated: <span id="last-updated"></span>
+</div>
+
+<form method="post">
+    <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
+    <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+</form>
 
 <script>
-const dungeons = {
-  'D1': {
-    'Chimerical Essence': 1,
-    'Griffin Leather': 600,
-    'Manticore Sting': 1000,
-    'Jackalope Antler': 1200,
-    'Dodocamel Plume': 3000,
-    'Griffin Talon': 3000
-  },
-  'D2': {
-    'Sinister Essence': 1,
-    "Acrobat's Ribbon": 2000,
-    "Magician's Cloth": 2000,
-    'Chaotic Chain': 3000,
-    'Cursed Ball': 3000
-  },
-  'D3': {
-    'Enchanted Essence': 1,
-    'Royal Cloth': 2000,
-    "Knight's Ingot": 2000,
-    "Bishop's Scroll": 2000,
-    'Regal Jewel': 3000,
-    'Sundering Jewel': 3000
-  },
-  'D4': {
-    'Pirate Essence': 1,
-    'Marksman Brooch': 2000,
-    'Corsair Crest': 2000,
-    'Damaged Anchor': 2000,
-    'Maelstrom Plating': 2000,
-    'Kraken Leather': 2000,
-    'Kraken Fang': 3000
-  }
-};
+async function fetchData() {
+    const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
+    const data = await response.json();
 
-function setCookie(name, value, days) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days*24*60*60*1000));
-  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
-}
+    const market = data.market;
+    const time = data.time;
+    document.getElementById('last-updated').textContent = new Date(time * 1000).toLocaleString();
 
-function getCookie(name) {
-  const cookies = document.cookie.split(';');
-  for (const c of cookies) {
-    const [key, val] = c.trim().split('=');
-    if (key === name) return val;
-  }
-  return '';
-}
+    const dungeons = {
+        'D1': {
+            'Chimerical Essence': 1,
+            'Griffin Leather': 600,
+            'Manticore Sting': 1000,
+            'Jackalope Antler': 1200,
+            'Dodocamel Plume': 3000,
+            'Griffin Talon': 3000
+        },
+        'D2': {
+            'Sinister Essence': 1,
+            "Acrobat's Ribbon": 2000,
+            "Magician's Cloth": 2000,
+            'Chaotic Chain': 3000,
+            'Cursed Ball': 3000
+        },
+        'D3': {
+            'Enchanted Essence': 1,
+            'Royal Cloth': 2000,
+            "Knight's Ingot": 2000,
+            "Bishop's Scroll": 2000,
+            'Regal Jewel': 3000,
+            'Sundering Jewel': 3000
+        },
+        'D4': {
+            'Pirate Essence': 1,
+            'Marksman Brooch': 2000,
+            'Corsair Crest': 2000,
+            'Damaged Anchor': 2000,
+            'Maelstrom Plating': 2000,
+            'Kraken Leather': 2000,
+            'Kraken Fang': 3000
+        }
+    };
 
-function toggleTheme() {
-  document.body.classList.toggle('light-mode');
-  setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
-}
+    const container = document.getElementById('dungeon-tables');
 
-window.onload = function() {
-  if (getCookie('theme') === 'light') document.body.classList.add('light-mode');
-  fetchData();
-};
+    for (const dungeon in dungeons) {
+        const items = dungeons[dungeon];
+        let rows = [];
+        let bestItem = '';
+        let bestValue = -Infinity;
 
-function fetchData() {
-  fetch('https://holychikenz.github.io/MWIApi/milkyapi.json')
-    .then(response => response.json())
-    .then(data => {
-      const market = data.market;
-      const timestamp = new Date(data.time * 1000);
-      const content = document.getElementById('content');
-      content.innerHTML = '';
+        for (const item in items) {
+            const tokens = items[item];
+            const ask = market[item]?.ask ?? -1;
+            const bid = market[item]?.bid ?? -1;
+            const maxVal = Math.max(ask, bid);
+            const valuePerToken = (maxVal > 0 && tokens > 0) ? (maxVal / tokens) : 0;
+            rows.push({item, tokens, ask, bid, valuePerToken});
+            if (valuePerToken > bestValue) {
+                bestValue = valuePerToken;
+                bestItem = item;
+            }
+        }
 
-      for (const [dungeon, items] of Object.entries(dungeons)) {
-        let html = `<h2>${dungeon}</h2>`;
-        html += '<table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th></tr></thead><tbody>';
-        for (const [item, tokens] of Object.entries(items)) {
-          const ask = market[item]?.ask !== undefined ? market[item].ask.toLocaleString() : 'N/A';
-          const bid = market[item]?.bid !== undefined ? market[item].bid.toLocaleString() : 'N/A';
-          html += `<tr><td>${item}</td><td>${tokens}</td><td>${ask}</td><td>${bid}</td></tr>`;
+        let html = `<h2>${dungeon}</h2><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
+        for (const row of rows) {
+            html += `<tr class="${row.item === bestItem ? 'highlight' : ''}"><td>${row.item}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
         }
         html += '</tbody></table>';
-        content.innerHTML += html;
-      }
-      document.getElementById('lastUpdated').textContent = 'Last Updated: ' + timestamp.toLocaleString();
-    })
-    .catch(err => {
-      document.getElementById('content').innerHTML = '<p>Failed to load data.</p>';
-    });
+        container.innerHTML += html;
+    }
 }
+
+fetchData();
 </script>
 
 </body>
