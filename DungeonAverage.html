@@ -7,7 +7,7 @@
   function googleTranslateElementInit() {
     new google.translate.TranslateElement({
       pageLanguage: 'en',
-      includedLanguages: 'zh-CN',
+      includedLanguages: 'en,zh-CN,es,fr,de,pt,ru,ja,ko,it',
       layout: google.translate.TranslateElement.InlineLayout.SIMPLE
     }, 'google_translate_element');
   }
@@ -208,13 +208,22 @@
   border-radius: 5px;
   box-sizing: border-box;
   font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 5px rgba(90, 90, 90, 0.3); /* ✨ new: soft shadow */
+}
+
+input[type="number"]:hover {
+  background-color: rgba(88, 166, 255, 0.08); /* ✨ new: very slight blue hover */
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.5); /* ✨ new: bigger shadow on hover */
 }
 
 input[type="number"]:focus {
   outline: none;
   border-color: var(--highlight-color);
-  background-color: var(--bg-color);
+  background-color: rgba(46, 160, 67, 0.1); /* ✨ greenish focus */
+  box-shadow: 0 0 10px rgba(46, 160, 67, 0.7); /* ✨ stronger glow */
 }
+
 input.edited {
   background-color: rgba(255, 255, 100, 0.2);
   border-color: #ffd700;
@@ -225,6 +234,25 @@ input[type="checkbox"] {
   accent-color: var(--highlight-color);
   cursor: pointer;
   margin-right: 5px;
+}
+#google_translate_element {
+  display: inline-block;
+  background-color: var(--heading-color);
+  color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.goog-te-combo {
+  background: var(--table-bg);
+  color: var(--text-color);
+  border: 1px solid var(--table-header-bg);
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 14px;
+  margin-left: 10px;
 }
 
 </style>
@@ -636,5 +664,4 @@ const lootTables = {
 Bagz ❤️ Goats
 </body>
 </html>
-
 
