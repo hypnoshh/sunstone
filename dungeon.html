@@ -35,14 +35,14 @@
   table {
     border-collapse: collapse;
     width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     background: var(--table-bg);
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     border-radius: 8px;
     overflow: hidden;
   }
   th, td {
-    padding: 12px 15px;
+    padding: 8px 10px;
     text-align: left;
   }
   th {
@@ -123,6 +123,19 @@ function toggleTheme() {
   document.body.classList.toggle('light-mode');
   setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
 }
+function toggleCollapse(id) {
+  const content = document.getElementById(id);
+  const header = document.getElementById('btn-' + id);
+  if (content.style.display === 'block') {
+    content.style.display = 'none';
+    header.classList.remove('active');
+    setCookie(id, 'collapsed', 365);
+  } else {
+    content.style.display = 'block';
+    header.classList.add('active');
+    setCookie(id, 'expanded', 365);
+  }
+}
 window.onload = function() {
   if (getCookie('theme') === 'light') {
     document.body.classList.add('light-mode');
@@ -146,49 +159,9 @@ window.onload = function() {
   <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
 </form>
 
-<script>
-async function fetchData() {
-  const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
-  const data = await response.json();
-  const market = data.market;
-  const time = data.time;
-  document.getElementById('last-updated').textContent = new Date(time * 1000).toLocaleString();
-
-  const lootTables = {
-    'Enchanted Chest': [...],
-    'Sinister Chest': [...],
-    'Chimerical Chest': [...],
-    'Pirate Chest': [...],
-    'Large Treasure Chest': [...]
-  };
-
-  const avgContainer = document.getElementById('average-values');
-  let avgHTML = '<h2>Average Chest Value</h2><table><thead><tr><th>Chest</th><th>Average Value</th></tr></thead><tbody>';
-
-  for (const chestName in lootTables) {
-    let total = 0;
-    for (const item of lootTables[chestName]) {
-      const avgQty = (item.minQuantity + item.maxQuantity) / 2;
-      const price = market[item.name]?.ask ?? market[item.name]?.bid ?? 0;
-      total += price * avgQty * (item.probability / 100);
-    }
-    avgHTML += `<tr><td>${chestName}</td><td>${Math.round(total).toLocaleString()}</td></tr>`;
-  }
-
-  avgHTML += '</tbody></table>';
-  avgContainer.innerHTML = avgHTML;
-
-  setupDungeonTables(market);
-}
-
-function setupDungeonTables(market) {
-  const container = document.getElementById('dungeon-tables');
-  // (placeholder) generate tables dynamically here
-}
-
-fetchData();
-</script>
+<script src="dungeons_full.js"></script>
 
 </body>
 </html>
+
 
