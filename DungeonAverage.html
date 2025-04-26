@@ -564,7 +564,8 @@ async function fetchData() {
       const combinedItems = [...new Set([
         ...drops.map(d => d.name),
         ...keys
-      ])];
+      ])].filter(name => !name.includes('Token'));
+
 
 
 
@@ -781,7 +782,7 @@ const lootTables = {
     { name: 'Blooming Trident', probability: 0.03, min: 1, max: 1 },
     { name: 'Blazing Trident', probability: 0.03, min: 1, max: 1 }
   ],
-  'Large Treasure Chest': [
+  'LargeTreasureChest': [
     { name: 'Coin', probability: 100, min: 30000, max: 60000 },
     { name: 'Coin', probability: 10.0, min: 150000, max: 300000 },
     { name: 'Pearl', probability: 60.0, min: 1, max: 3 },
@@ -795,3 +796,4 @@ const lootTables = {
 Bagz ❤️ Goats
 </body>
 </html>
+
