@@ -1,284 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sunstone Transmute Profit Simulator</title>
-  <style>
+<meta charset="UTF-8">
+<title>Dungeon Item Prices</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background: #f9f9f9;
-    }
-    h1 {
-      text-align: center;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-    .grid label {
-      display: flex;
-      flex-direction: column;
-      font-size: 0.9em;
-    }
-    .grid input {
-      padding: 8px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 4px;
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    #results {
-      margin-top: 30px;
-      background: #eef;
-      padding: 15px;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      font-family: Consolas, monospace;
-    }
-  </style>
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  :root {
+    --bg-color: #0d1117;
+    --text-color: #c9d1d9;
+    --heading-color: #58a6ff;
+    --table-bg: #161b22;
+    --table-header-bg: #21262d;
+    --table-hover-bg: #21262d;
+    --highlight-color: #2ea043;
+  }
+  .light-mode {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --heading-color: #007acc;
+    --table-bg: #f3f3f3;
+    --table-header-bg: #d1d5da;
+    --table-hover-bg: #e1e4e8;
+    --highlight-color: #ffd700;
+  }
+  h1 {
+    color: var(--heading-color);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 30px;
+    background: var(--table-bg);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  th {
+    background: var(--table-header-bg);
+    color: var(--text-color);
+    font-weight: bold;
+    border-bottom: 1px solid #30363d;
+  }
+  tr:nth-child(even) { background: var(--table-bg); }
+  tr:nth-child(odd) { background: var(--bg-color); }
+  tr:hover { background: var(--table-hover-bg); }
+  .highlight { background: var(--highlight-color) !important; color: #000 !important; }
+  .refresh-btn, .theme-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #238636;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+  }
+  .refresh-btn:hover, .theme-btn:hover { background: #2ea043; }
+  .footer {
+    margin-top: 20px;
+    color: #8b949e;
+    font-size: 14px;
+  }
+  .collapsible {
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    text-align: left;
+    outline: none;
+    background-color: var(--heading-color);
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .collapsible::after {
+    content: '\25B6';
+    font-size: 16px;
+    transition: transform 0.3s;
+  }
+  .active::after {
+    transform: rotate(90deg);
+  }
+  .content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+  }
+  #average-values, #dungeon-tables {
+    transition: all 0.5s ease;
+    opacity: 1;
+    position: relative;
+  }
+  .fade-out {
+    opacity: 0;
+  }
+  #loading-spinner {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 5px solid var(--heading-color);
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 140px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -70px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Sunstone Transmute Simulator</h1>
-    <form id="sim-form">
+<h1>Dungeon Item Prices</h1>
 
-      <!-- Item Costs -->
-      <fieldset>
-        <legend><strong>Item Costs (coins each)</strong></legend>
-        <div class="grid">
-          <label>Prime Catalyst Cost:
-            <input type="number" id="cost-catalyst" value="0" min="0" step="1">
-          </label>
-          <label>Sunstone Cost:
-            <input type="number" id="cost-sunstone" value="0" min="0" step="1">
-          </label>
-          <label>Star Fragment Cost (per fragment):
-            <input type="number" id="cost-starfrag" value="0" min="0" step="0.01">
-          </label>
-          <label>Moonstone Cost:
-            <input type="number" id="cost-moonstone" value="0" min="0" step="0.01">
-          </label>
-          <label>Philo Stone Cost:
-            <input type="number" id="cost-philo" value="0" min="0" step="0.01">
-          </label>
-          <label>Alchemy Essence Cost:
-            <input type="number" id="cost-essence" value="0" min="0" step="0.01">
-          </label>
-          <label>Crate Cost:
-            <input type="number" id="cost-crate" value="0" min="0" step="0.01">
-          </label>
-        </div>
-      </fieldset>
+<div style="margin-bottom: 20px;">
+  <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="fetchDataSmooth()"></label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
+  <label style="margin-left: 20px;">
+    <input type="checkbox" id="use-bid-only" onchange="fetchDataSmooth()"> Use Bid Price Only
+    <span class="tooltip">❔<span class="tooltiptext">Check to use only bid price instead of best of ask/bid.</span></span>
+  </label>
+</div>
 
-      <!-- Transmute Parameters -->
-      <fieldset style="margin-top:20px;">
-        <legend><strong>Transmute Parameters</strong></legend>
-        <div class="grid">
-          <label>Success Rate (%):
-            <input type="number" id="rate-success" value="50" min="0" max="100" step="0.1">
-          </label>
-          <label>Coin Cost per Transmute:
-            <input type="number" id="cost-coin" value="1000" min="0" step="1">
-          </label>
-          <label>Essence Drop Chance (%):
-            <input type="number" id="rate-essence" value="10" min="0" max="100" step="0.1">
-          </label>
-          <label>Crate Drop Chance (%):
-            <input type="number" id="rate-crate" value="5" min="0" max="100" step="0.1">
-          </label>
-        </div>
-      </fieldset>
+<table id="average-values" style="margin-bottom: 30px;"></table>
 
-      <!-- Success Outcome Distribution -->
-      <fieldset style="margin-top:20px;">
-        <legend><strong>Success Outcome Distribution (%)</strong></legend>
-        <div class="grid">
-          <label>Star Fragments:
-            <input type="number" id="rate-out-star" value="25" min="0" max="100" step="0.1">
-          </label>
-          <label>Moonstone:
-            <input type="number" id="rate-out-moon" value="25" min="0" max="100" step="0.1">
-          </label>
-          <label>Sunstone:
-            <input type="number" id="rate-out-sun" value="25" min="0" max="100" step="0.1">
-          </label>
-          <label>Philo Stone:
-            <input type="number" id="rate-out-philo" value="25" min="0" max="100" step="0.1">
-          </label>
-        </div>
-      </fieldset>
+<div id="dungeon-tables"></div>
+<div id="loading-spinner"></div>
 
-      <!-- Simulation Settings -->
-      <fieldset style="margin-top:20px;">
-        <legend><strong>Simulation Settings</strong></legend>
-        <div class="grid">
-          <label>Hours to Run:
-            <input type="number" id="sim-hours" value="1" min="0.01" step="0.01">
-          </label>
-          <label>Seconds per Transmute:
-            <input type="number" id="sim-time" value="3" min="0.1" step="0.1">
-          </label>
-        </div>
-      </fieldset>
+<div class="footer">
+  Last Updated: <span id="last-updated"></span>
+</div>
 
-      <button type="button" id="run-sim">Run Simulation</button>
-    </form>
+<form method="post">
+  <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
+  <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+</form>
 
-    <div id="results"></div>
-  </div>
+<script>
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
+  document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
+}
 
+function getCookie(name) {
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') { c = c.substring(1); }
+    if (c.indexOf(name + '=') == 0) { return c.substring(name.length + 1, c.length); }
+  }
+  return '';
+}
 
-  <script>
-    document.getElementById('run-sim').addEventListener('click', () => {
-      // Read costs
-      const cCatalyst    = parseFloat(document.getElementById('cost-catalyst').value);
-      const cSunstone    = parseFloat(document.getElementById('cost-sunstone').value);
-      const cStarFrag    = parseFloat(document.getElementById('cost-starfrag').value);
-      const cMoonstone   = parseFloat(document.getElementById('cost-moonstone').value);
-      const cPhilo       = parseFloat(document.getElementById('cost-philo').value);
-      const cEssence     = parseFloat(document.getElementById('cost-essence').value);
-      const cCrate       = parseFloat(document.getElementById('cost-crate').value);
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
+}
 
-      // Transmute params
-      const rateSuccess  = parseFloat(document.getElementById('rate-success').value) / 100;
-      const costCoin     = parseFloat(document.getElementById('cost-coin').value);
-      const rateEssence  = parseFloat(document.getElementById('rate-essence').value) / 100;
-      const rateCrate    = parseFloat(document.getElementById('rate-crate').value) / 100;
+window.onload = function() {
+  if (getCookie('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+  fetchData();
+};
 
-      // Outcome distribution
-      const rStar  = parseFloat(document.getElementById('rate-out-star').value) / 100;
-      const rMoon  = parseFloat(document.getElementById('rate-out-moon').value) / 100;
-      const rSun   = parseFloat(document.getElementById('rate-out-sun').value) / 100;
-      const rPhilo = parseFloat(document.getElementById('rate-out-philo').value) / 100;
+function formatNumber(num) {
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+  return num.toFixed(0);
+}
 
-      // Normalize distribution
-      const totalOut = rStar + rMoon + rSun + rPhilo;
-      let pStar, pMoon, pSun, pPhilo;
-      if (totalOut <= 0) {
-        pStar = pMoon = pSun = pPhilo = 0.25;
-      } else {
-        pStar  = rStar  / totalOut;
-        pMoon  = rMoon  / totalOut;
-        pSun   = rSun   / totalOut;
-        pPhilo = rPhilo / totalOut;
-      }
+async function fetchData() {
+  const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
+  const data = await response.json();
+  const market = data.market;
+  const time = data.time;
+  const lastUpdated = document.getElementById('last-updated');
+  if (lastUpdated) {
+    lastUpdated.textContent = new Date(time * 1000).toLocaleString();
+  }
 
-      // Simulation settings
-      const hours       = parseFloat(document.getElementById('sim-hours').value);
-      const secPerTrans = parseFloat(document.getElementById('sim-time').value);
-      const attempts    = Math.floor((hours * 3600) / secPerTrans);
+  const container = document.getElementById('dungeon-tables');
+  container.innerHTML = '';
+  const avgTable = document.getElementById('average-values');
+  let avgHtml = '<thead><tr><th>Dungeon</th><th>Avg Chest Value</th><th>Profit/Hour</th><th>Profit/Day</th></tr></thead><tbody>';
 
-      // Totals & counters
-      let spentCoins       = 0;
-      let spentSunstones   = 0;
-      let spentCatalysts   = 0;
-      let cntStarFrag      = 0;
-      let cntMoonstone     = 0;
-      let cntSunstone      = 0;
-      let cntPhilo         = 0;
-      let cntEssence       = 0;
-      let cntCrate         = 0;
+  const useBidOnly = document.getElementById('use-bid-only').checked;
 
-      for (let i = 0; i < attempts; i++) {
-        // base costs
-        spentCoins     += costCoin;
-        spentSunstones += cSunstone;
+  for (const dungeon in lootTables) {
+    let averageValue = 0;
+    const loot = lootTables[dungeon];
+    for (const drop of loot) {
+      const marketItem = market[drop.name];
+      if (!marketItem) continue;
+      const price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
+      if (price <= 0) continue;
+      const expectedQty = (drop.min + drop.max) / 2;
+      averageValue += (price * expectedQty) * (drop.probability / 100);
+    }
 
-        // guaranteed drops
-        if (Math.random() < rateEssence) cntEssence++;
-        if (Math.random() < rateCrate)   cntCrate++;
+    const runTimeMinutes = parseFloat(document.getElementById('run-time').value) || 10;
+    const buffActive = document.getElementById('drop-buff').checked;
+    const buffMultiplier = buffActive ? 1.295 : 1;
 
-        // transmute outcome
-        if (Math.random() < rateSuccess) {
-          // spend a Prime Catalyst on success
-          spentCatalysts++;
+    const runsPerHour = 60 / runTimeMinutes;
+    const profitPerHour = averageValue * runsPerHour * buffMultiplier;
+    const profitPerDay = profitPerHour * 24;
 
-          // pick result by weighted distribution
-          const r = Math.random();
-          if (r < pStar) {
-            cntStarFrag += 10;
-          } else if (r < pStar + pMoon) {
-            cntMoonstone++;
-          } else if (r < pStar + pMoon + pSun) {
-            cntSunstone++;
-          } else {
-            cntPhilo++;
-          }
-        }
-      }
+    avgHtml += `<tr><td>${dungeon}</td><td>${formatNumber(averageValue)}</td><td>${formatNumber(profitPerHour)}</td><td>${formatNumber(profitPerDay)}</td></tr>`;
+  }
 
-      // Calculate spends & revenues
-      const spentCatalystCost = spentCatalysts * cCatalyst;
-      const totalSpent        = spentCoins + spentSunstones + spentCatalystCost;
+  avgHtml += '</tbody>';
+  avgTable.innerHTML = avgHtml;
 
-      const revStarFrag  = cntStarFrag  * cStarFrag;
-      const revMoonstone = cntMoonstone * cMoonstone;
-      const revSunstone  = cntSunstone  * cSunstone;
-      const revPhilo     = cntPhilo     * cPhilo;
-      const revEssence   = cntEssence   * cEssence;
-      const revCrate     = cntCrate     * cCrate;
+  setupCollapsibles();
+}
 
-      const totalRev   = revStarFrag + revMoonstone + revSunstone + revPhilo + revEssence + revCrate;
-      const netProfit  = totalRev - totalSpent;
-      const profitHr   = netProfit / hours;
-      const profitTx   = netProfit / attempts;
-
-      // Display results
-      document.getElementById('results').textContent = `
-Simulation over ${hours.toFixed(2)} h (${attempts} attempts):
-
-Outputs:
-  • Star Fragments:   ${cntStarFrag}
-  • Moonstones:       ${cntMoonstone}
-  • Sunstones:        ${cntSunstone}
-  • Philo Stones:     ${cntPhilo}
-  • Essences:         ${cntEssence}
-  • Crates:           ${cntCrate}
-
-Finances:
-  • Coins Spent:           ${spentCoins.toLocaleString()}
-  • Sunstones Spent:       ${spentSunstones.toLocaleString()}
-  • Prime Catalysts Spent: ${spentCatalysts}
-  • Catalyst Cost:         ${spentCatalystCost.toLocaleString()}
-  • Total Spent:           ${totalSpent.toLocaleString()}
-
-  • Rev. Star Fragments:   ${revStarFrag.toLocaleString()}
-  • Rev. Moonstones:       ${revMoonstone.toLocaleString()}
-  • Rev. Sunstones:        ${revSunstone.toLocaleString()}
-  • Rev. Philo Stones:     ${revPhilo.toLocaleString()}
-  • Rev. Essences:         ${revEssence.toLocaleString()}
-  • Rev. Crates:           ${revCrate.toLocaleString()}
-
-  • Total Revenue:         ${totalRev.toLocaleString()}
-  • Net Profit:            ${netProfit.toLocaleString()} (${profitHr.toFixed(2)}/h, ${profitTx.toFixed(2)}/tx)
-      `.trim();
+function fetchDataSmooth() {
+  const avgTable = document.getElementById('average-values');
+  const container = document.getElementById('dungeon-tables');
+  const spinner = document.getElementById('loading-spinner');
+  avgTable.classList.add('fade-out');
+  container.classList.add('fade-out');
+  spinner.style.display = 'block';
+  setTimeout(() => {
+    fetchData().then(() => {
+      avgTable.classList.remove('fade-out');
+      container.classList.remove('fade-out');
+      spinner.style.display = 'none';
     });
-  </script>
+  }, 300);
+}
+
+function setupCollapsibles() {
+  const coll = document.getElementsByClassName('collapsible');
+  for (let i = 0; i < coll.length; i++) {
+    const content = coll[i].nextElementSibling;
+    const dungeon = coll[i].innerText;
+    if (getCookie('collapse_' + dungeon) === 'open') {
+      content.style.display = 'block';
+      coll[i].classList.add('active');
+    }
+    coll[i].addEventListener('click', function() {
+      this.classList.toggle('active');
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        setCookie('collapse_' + dungeon, 'closed', 365);
+      } else {
+        content.style.display = 'block';
+        setCookie('collapse_' + dungeon, 'open', 365);
+      }
+    });
+  }
+}
+
+const lootTables = {
+  'D1': [
+    { name: 'Chimerical Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Chimerical Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Griffin Leather', probability: 10, min: 1, max: 1 },
+    { name: 'Manticore Sting', probability: 6, min: 1, max: 1 },
+    { name: 'Jackalope Antler', probability: 5, min: 1, max: 1 },
+    { name: 'Dodocamel Plume', probability: 2, min: 1, max: 1 },
+    { name: 'Griffin Talon', probability: 2, min: 1, max: 1 }
+  ],
+  'D2': [
+    { name: 'Sinister Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Sinister Essence', probability: 5, min: 2000, max: 4000 },
+    { name: "Acrobat's Ribbon", probability: 4, min: 1, max: 1 },
+    { name: "Magician's Cloth", probability: 4, min: 1, max: 1 },
+    { name: 'Chaotic Chain', probability: 2, min: 1, max: 1 }
+  ],
+  'D3': [
+    { name: 'Enchanted Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Enchanted Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Royal Cloth', probability: 4, min: 1, max: 1 },
+    { name: "Knight's Ingot", probability: 4, min: 1, max: 1 },
+    { name: "Bishop's Scroll", probability: 4, min: 1, max: 1 },
+    { name: 'Regal Jewel', probability: 2, min: 1, max: 1 },
+    { name: 'Sundering Jewel', probability: 2, min: 1, max: 1 }
+  ],
+  'D4': [
+    { name: 'Pirate Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Pirate Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Marksman Brooch', probability: 3, min: 1, max: 1 },
+    { name: 'Corsair Crest', probability: 3, min: 1, max: 1 },
+    { name: 'Damaged Anchor', probability: 3, min: 1, max: 1 },
+    { name: 'Maelstrom Plating', probability: 3, min: 1, max: 1 },
+    { name: 'Kraken Leather', probability: 3, min: 1, max: 1 },
+    { name: 'Kraken Fang', probability: 3, min: 1, max: 1 }
+  ]
+};
+</script>
 
 </body>
 </html>
+
