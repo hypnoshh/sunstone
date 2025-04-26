@@ -3,165 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Dungeon Item Prices</title>
-<style>
-  body {
-    background: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 20px;
-  }
-  :root {
-    --bg-color: #0d1117;
-    --text-color: #c9d1d9;
-    --heading-color: #58a6ff;
-    --table-bg: #161b22;
-    --table-header-bg: #21262d;
-    --table-hover-bg: #21262d;
-    --highlight-color: #2ea043;
-  }
-  .light-mode {
-    --bg-color: #ffffff;
-    --text-color: #000000;
-    --heading-color: #007acc;
-    --table-bg: #f3f3f3;
-    --table-header-bg: #d1d5da;
-    --table-hover-bg: #e1e4e8;
-    --highlight-color: #ffd700;
-  }
-  h1 {
-    color: var(--heading-color);
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 10px;
-    background: var(--table-bg);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th, td {
-    padding: 8px 10px;
-    text-align: left;
-  }
-  th {
-    background: var(--table-header-bg);
-    color: var(--text-color);
-    font-weight: bold;
-    border-bottom: 1px solid #30363d;
-  }
-  tr:nth-child(even) { background: var(--table-bg); }
-  tr:nth-child(odd) { background: var(--bg-color); }
-  tr:hover { background: var(--table-hover-bg); }
-  .highlight { background: var(--highlight-color) !important; color: #000 !important; }
-  .refresh-btn, .theme-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #238636;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    margin-right: 10px;
-  }
-  .refresh-btn:hover, .theme-btn:hover { background: #2ea043; }
-  .footer {
-    margin-top: 20px;
-    color: #8b949e;
-    font-size: 14px;
-  }
-  .collapsible {
-    cursor: pointer;
-    padding: 10px;
-    font-size: 18px;
-    border: none;
-    text-align: left;
-    outline: none;
-    background-color: var(--heading-color);
-    color: white;
-    margin-top: 10px;
-    width: 100%;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .collapsible::after {
-    content: '\25B6';
-    font-size: 16px;
-    transition: transform 0.3s;
-  }
-  .active::after {
-    transform: rotate(90deg);
-  }
-  .content {
-    padding: 0 18px;
-    display: none;
-    overflow: hidden;
-  }
-</style>
-<script>
-function setCookie(name, value, days) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days*24*60*60*1000));
-  document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
-}
-function getCookie(name) {
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') { c = c.substring(1); }
-    if (c.indexOf(name + '=') == 0) { return c.substring(name.length + 1, c.length); }
-  }
-  return '';
-}
-function toggleTheme() {
-  document.body.classList.toggle('light-mode');
-  setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
-}
-function toggleCollapse(id) {
-  const content = document.getElementById(id);
-  const header = document.getElementById('btn-' + id);
-  if (content.style.display === 'block') {
-    content.style.display = 'none';
-    header.classList.remove('active');
-    setCookie(id, 'collapsed', 365);
-  } else {
-    content.style.display = 'block';
-    header.classList.add('active');
-    setCookie(id, 'expanded', 365);
-  }
-}
-window.onload = function() {
-  if (getCookie('theme') === 'light') {
-    document.body.classList.add('light-mode');
-  }
-}
-</script>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <h1>Dungeon Item Prices</h1>
-
 <div id="average-values"></div>
 <div id="dungeon-tables"></div>
-
 <div class="footer">
   Last Updated: <span id="last-updated"></span>
 </div>
-
 <form method="post">
   <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
   <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
 </form>
-
 <script src="dungeons_full.js"></script>
-
+<script src="theme_and_collapse.js"></script>
 </body>
 </html>
-
-
