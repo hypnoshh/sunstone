@@ -192,19 +192,15 @@
 <h1>Dungeon Run Average</h1>
 
 <div style="margin-bottom: 20px;">
-  <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="fetchDataSmooth()"></label>
-  <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
-  <label style="margin-left: 20px;">
-    <input type="checkbox" id="use-bid-only" onchange="fetchDataSmooth()"> Use Bid Price Only
+  <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="saveSettings(); fetchDataSmooth()"></label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="saveSettings(); fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="use-bid-only" onchange="saveSettings(); fetchDataSmooth()"> Use Bid Price Only
     <span class="tooltip">❔<span class="tooltiptext">Check to use only bid price instead of best of ask/bid.</span></span>
   </label>
-  <label style="margin-left: 20px;">
-    <input type="checkbox" id="include-keys" onchange="fetchDataSmooth()"> Include Key Prices
+  <label style="margin-left: 20px;"><input type="checkbox" id="include-keys" onchange="saveSettings(); fetchDataSmooth()"> Include Key Prices
     <span class="tooltip">❔<span class="tooltiptext">Subtract Chest Key and Entry Key prices from profit.</span></span>
   </label>
-  <label style="margin-left: 20px;">
-    <input type="checkbox" id="use-median" onchange="fetchDataSmooth()"> Use Median Prices 24Hr/Current Prices
-  </label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="use-median" onchange="saveSettings(); fetchDataSmooth()"> Use Median Prices</label>
 </div>
 
 <div id="warnings" class="warning">
@@ -250,6 +246,24 @@ function getCookie(name) {
   }
   return '';
 }
+function saveSettings() {
+  setCookie('dropBuff', document.getElementById('drop-buff').checked, 365);
+  setCookie('useBidOnly', document.getElementById('use-bid-only').checked, 365);
+  setCookie('includeKeys', document.getElementById('include-keys').checked, 365);
+  setCookie('useMedian', document.getElementById('use-median').checked, 365);
+  setCookie('runTime', document.getElementById('run-time').value, 365);
+}
+
+function loadSettings() {
+  document.getElementById('drop-buff').checked = getCookie('dropBuff') === 'true';
+  document.getElementById('use-bid-only').checked = getCookie('useBidOnly') === 'true';
+  document.getElementById('include-keys').checked = getCookie('includeKeys') === 'true';
+  document.getElementById('use-median').checked = getCookie('useMedian') === 'true';
+  const savedRunTime = getCookie('runTime');
+  if (savedRunTime) {
+    document.getElementById('run-time').value = savedRunTime;
+  }
+}
 
 function toggleTheme() {
   document.body.classList.toggle('light-mode');
@@ -260,6 +274,7 @@ window.onload = function() {
   if (getCookie('theme') === 'light') {
     document.body.classList.add('light-mode');
   }
+  loadSettings();
   fetchData();
   setupWarningToggle();
 };
