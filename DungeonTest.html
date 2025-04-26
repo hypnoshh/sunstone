@@ -52,7 +52,11 @@ async function fetchData() {
 
     const market = data.market;
     const time = data.time;
-    document.getElementById('last-updated').textContent = new Date(time * 1000).toLocaleString();
+    const lastUpdated = document.getElementById('last-updated');
+    if (lastUpdated) {
+      lastUpdated.textContent = new Date(time * 1000).toLocaleString();
+    }
+
 
     const dungeons = {
         'D1': {
