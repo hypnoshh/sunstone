@@ -2,34 +2,36 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dungeon Loot Values</title>
+<title>Dungeon Item Prices</title>
 <style>
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg-color);
+    color: var(--text-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
   }
   :root {
-    --bg: #0d1117;
-    --text: #c9d1d9;
-    --heading: #58a6ff;
+    --bg-color: #0d1117;
+    --text-color: #c9d1d9;
+    --heading-color: #58a6ff;
     --table-bg: #161b22;
-    --table-header: #21262d;
-    --table-hover: #21262d;
-    --highlight: #2ea043;
+    --table-header-bg: #21262d;
+    --table-hover-bg: #21262d;
+    --highlight-color: #2ea043;
   }
   .light-mode {
-    --bg: #ffffff;
-    --text: #000000;
-    --heading: #007acc;
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --heading-color: #007acc;
     --table-bg: #f3f3f3;
-    --table-header: #d1d5da;
-    --table-hover: #e1e4e8;
-    --highlight: #ffd700;
+    --table-header-bg: #d1d5da;
+    --table-hover-bg: #e1e4e8;
+    --highlight-color: #ffd700;
   }
-  h1, h2 { color: var(--heading); }
+  h1 {
+    color: var(--heading-color);
+  }
   table {
     border-collapse: collapse;
     width: 100%;
@@ -44,14 +46,16 @@
     text-align: left;
   }
   th {
-    background: var(--table-header);
-    color: var(--text);
+    background: var(--table-header-bg);
+    color: var(--text-color);
+    font-weight: bold;
+    border-bottom: 1px solid #30363d;
   }
   tr:nth-child(even) { background: var(--table-bg); }
-  tr:nth-child(odd) { background: var(--bg); }
-  tr:hover { background: var(--table-hover); }
-  .highlight { background: var(--highlight) !important; color: #000 !important; }
-  .button {
+  tr:nth-child(odd) { background: var(--bg-color); }
+  tr:hover { background: var(--table-hover-bg); }
+  .highlight { background: var(--highlight-color) !important; color: #000 !important; }
+  .refresh-btn, .theme-btn {
     display: inline-block;
     padding: 10px 20px;
     background: #238636;
@@ -60,45 +64,58 @@
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
-    margin: 10px 5px;
+    margin-top: 10px;
+    margin-right: 10px;
   }
-  .button:hover { background: #2ea043; }
+  .refresh-btn:hover, .theme-btn:hover { background: #2ea043; }
+  .footer {
+    margin-top: 20px;
+    color: #8b949e;
+    font-size: 14px;
+  }
   .collapsible {
-    background-color: var(--heading);
-    color: white;
     cursor: pointer;
     padding: 10px;
     font-size: 18px;
-    width: 100%;
     border: none;
-    border-radius: 5px;
-    margin-top: 10px;
     text-align: left;
     outline: none;
+    background-color: var(--heading-color);
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
   .collapsible::after {
     content: '\25B6';
+    font-size: 16px;
     transition: transform 0.3s;
   }
   .active::after {
     transform: rotate(90deg);
   }
-  .content { display: none; padding: 0 18px; overflow: hidden; }
-  .footer { margin-top: 20px; font-size: 14px; color: #8b949e; }
+  .content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+  }
 </style>
 <script>
 function setCookie(name, value, days) {
-  const d = new Date(); d.setTime(d.getTime() + (days*24*60*60*1000));
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
   document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
 }
 function getCookie(name) {
-  const cookies = document.cookie.split(';');
-  for (let c of cookies) {
-    while (c.charAt(0) === ' ') c = c.substring(1);
-    if (c.indexOf(name + '=') === 0) return c.substring(name.length + 1);
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') { c = c.substring(1); }
+    if (c.indexOf(name + '=') == 0) { return c.substring(name.length + 1, c.length); }
   }
   return '';
 }
@@ -106,99 +123,67 @@ function toggleTheme() {
   document.body.classList.toggle('light-mode');
   setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
 }
-window.onload = () => {
-  if (getCookie('theme') === 'light') document.body.classList.add('light-mode');
-};
+window.onload = function() {
+  if (getCookie('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+}
 </script>
 </head>
 <body>
-<h1>Dungeon Loot Values</h1>
+
+<h1>Dungeon Item Prices</h1>
 
 <div id="average-values"></div>
 <div id="dungeon-tables"></div>
 
-<div class="footer">Last Updated: <span id="last-updated"></span></div>
+<div class="footer">
+  Last Updated: <span id="last-updated"></span>
+</div>
 
-<button class="button" onclick="window.location.reload()">Refresh</button>
-<button class="button" onclick="toggleTheme()">Toggle Dark/Light</button>
+<form method="post">
+  <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
+  <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+</form>
 
 <script>
-const lootTables = {
-  "Enchanted Chest": [...],
-  "Sinister Chest": [...],
-  "Chimerical Chest": [...],
-  "Pirate Chest": [...],
-  "Large Treasure Chest": [...]
-};
-
 async function fetchData() {
-  const res = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
-  const data = await res.json();
+  const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
+  const data = await response.json();
   const market = data.market;
-  document.getElementById('last-updated').textContent = new Date(data.time * 1000).toLocaleString();
+  const time = data.time;
+  document.getElementById('last-updated').textContent = new Date(time * 1000).toLocaleString();
 
-  const avgDiv = document.getElementById('average-values');
+  const lootTables = {
+    'Enchanted Chest': [...],
+    'Sinister Chest': [...],
+    'Chimerical Chest': [...],
+    'Pirate Chest': [...],
+    'Large Treasure Chest': [...]
+  };
+
+  const avgContainer = document.getElementById('average-values');
   let avgHTML = '<h2>Average Chest Value</h2><table><thead><tr><th>Chest</th><th>Average Value</th></tr></thead><tbody>';
 
-  for (const chest in lootTables) {
+  for (const chestName in lootTables) {
     let total = 0;
-    for (const item of lootTables[chest]) {
+    for (const item of lootTables[chestName]) {
       const avgQty = (item.minQuantity + item.maxQuantity) / 2;
-      const price = market[item.name]?.ask || market[item.name]?.bid || 0;
+      const price = market[item.name]?.ask ?? market[item.name]?.bid ?? 0;
       total += price * avgQty * (item.probability / 100);
     }
-    avgHTML += `<tr><td>${chest}</td><td>${Math.round(total).toLocaleString()}</td></tr>`;
+    avgHTML += `<tr><td>${chestName}</td><td>${Math.round(total).toLocaleString()}</td></tr>`;
   }
+
   avgHTML += '</tbody></table>';
-  avgDiv.innerHTML = avgHTML;
+  avgContainer.innerHTML = avgHTML;
 
   setupDungeonTables(market);
 }
 
 function setupDungeonTables(market) {
   const container = document.getElementById('dungeon-tables');
-  for (const dungeon in lootTables) {
-    const drops = lootTables[dungeon];
-    let bestItem = null, bestValue = -Infinity;
-    const rows = drops.map(item => {
-      const price = market[item.name]?.ask || market[item.name]?.bid || 0;
-      const avgQty = (item.minQuantity + item.maxQuantity) / 2;
-      const value = (price * avgQty * (item.probability / 100)) || 0;
-      if (value > bestValue) { bestValue = value; bestItem = item.name; }
-      return { name: item.name, price, avgQty, value };
-    });
-
-    let html = `<button class="collapsible">${dungeon}</button><div class="content"><table><thead><tr><th>Item</th><th>Average Qty</th><th>Market Price</th><th>Expected Value</th></tr></thead><tbody>`;
-    for (const row of rows) {
-      html += `<tr class="${row.name === bestItem ? 'highlight' : ''}"><td>${row.name}</td><td>${row.avgQty}</td><td>${row.price.toLocaleString()}</td><td>${Math.round(row.value).toLocaleString()}</td></tr>`;
-    }
-    html += '</tbody></table></div>';
-    container.innerHTML += html;
-  }
-
-  setupCollapsibles();
-}
-
-function setupCollapsibles() {
-  const buttons = document.getElementsByClassName('collapsible');
-  for (let i = 0; i < buttons.length; i++) {
-    const content = buttons[i].nextElementSibling;
-    const id = buttons[i].innerText;
-    if (getCookie('collapse_' + id) === 'open') {
-      content.style.display = 'block';
-      buttons[i].classList.add('active');
-    }
-    buttons[i].onclick = function() {
-      this.classList.toggle('active');
-      if (content.style.display === 'block') {
-        content.style.display = 'none';
-        setCookie('collapse_' + id, 'closed', 365);
-      } else {
-        content.style.display = 'block';
-        setCookie('collapse_' + id, 'open', 365);
-      }
-    };
-  }
+  // (placeholder) generate tables dynamically here
 }
 
 fetchData();
