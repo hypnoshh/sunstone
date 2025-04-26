@@ -422,8 +422,8 @@ async function fetchData() {
     const item = allItems[itemName];
     allHtml += `<tr>
     <td>${itemName}</td>
-    <td><input type="number" value="${item.ask !== undefined ? item.ask : ''}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
-    <td><input type="number" value="${item.bid !== undefined ? item.bid : ''}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
+    <td><input type="number" value="${customPrices[item.name]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
+    <td><input type="number" value="${customPrices[item.name]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
     </tr>`;
 
   }
