@@ -215,9 +215,9 @@ async function fetchData() {
     for (const dungeon in dungeons) {
         const items = dungeons[dungeon];
         let rows = [];
-        let bestItem = '';
+        let bestItems = [];
         let bestValue = -Infinity;
-
+        
         for (const item in items) {
             const tokens = items[item];
             const ask = market[item]?.ask ?? -1;
@@ -225,11 +225,15 @@ async function fetchData() {
             const maxVal = Math.max(ask, bid);
             const valuePerToken = (maxVal > 0 && tokens > 0) ? (maxVal / tokens) : 0;
             rows.push({item, tokens, ask, bid, valuePerToken});
+        
             if (valuePerToken > bestValue) {
                 bestValue = valuePerToken;
-                bestItem = item;
+                bestItems = [item]; // reset and set new best
+            } else if (valuePerToken === bestValue) {
+                bestItems.push(item); // add another best
             }
         }
+
 
         let html = `<button class="collapsible">${dungeon}</button><div class="content"><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
         for (const row of rows) {
