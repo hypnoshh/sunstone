@@ -558,17 +558,21 @@ async function fetchData() {
     allHtml += `<thead><tr><th colspan="3" style="background: var(--heading-color); color: white; font-size: 18px;">${dungeon}</th></tr>`;
     allHtml += '<tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>';
 
-    const drops = lootTables[dungeon];
-    for (const drop of drops) {
-      const itemName = drop.name;
-      const item = allItems[itemName];
-      if (!item) continue; // Skip if item isn't in market
-      allHtml += `<tr>
-        <td>${itemName}</td>
-        <td><input type="number" value="${customPrices[itemName]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
-        <td><input type="number" value="${customPrices[itemName]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
-      </tr>`;
-    }
+      const drops = lootTables[dungeon] || [];
+      const keys = keyItems[dungeon] || [];
+
+      const combinedItems = [...drops.map(d => d.name), ...keys];
+
+      for (const itemName of combinedItems) {
+        const item = allItems[itemName];
+        if (!item) continue; // skip if no market data
+        allHtml += `<tr>
+          <td>${itemName}</td>
+          <td><input type="number" value="${customPrices[itemName]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
+          <td><input type="number" value="${customPrices[itemName]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
+        </tr>`;
+      }
+
 
     allHtml += '</tbody>';
   }
