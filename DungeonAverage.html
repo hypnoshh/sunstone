@@ -266,14 +266,32 @@ body {
   max-height: 2000px; /* plenty big for your table */
   padding-top: 10px;
 }
+.cheat-sheet-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #58a6ff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-right: 10px;
+  transition: background 0.3s ease;
+}
+.cheat-sheet-btn:hover {
+  background: #1f6feb;
+}
 
 
 </style>
 </head>
 <body>
 
-<h1>Dungeon Run Average</h1>
+<h1>Dungeon Calculator Average</h1>
 <div id="google_translate_element" style="margin-bottom: 20px;"></div>
+<a href="./dungeon.html" class="cheat-sheet-btn">Token Cheat Sheet</a>
+
 <div style="margin-bottom: 20px;">
   <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="saveSettings(); fetchDataSmooth()"></label>
   <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="saveSettings(); fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
@@ -437,6 +455,29 @@ async function fetchData() {
         price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
       }
 
+      //  If it's a Token, adjust price to be based on best money/token value
+      if (drop.name.includes('Token')) {
+        const tokenItems = dungeons[dungeon];
+        if (tokenItems) {
+          let bestValuePerToken = 0;
+          for (const item in tokenItems) {
+            const tokens = tokenItems[item];
+            const itemMarket = market[item];
+            if (!itemMarket) continue;
+            const bestMarketPrice = useBidOnly ? (itemMarket.bid ?? 0) : Math.max(itemMarket.ask ?? 0, itemMarket.bid ?? 0);
+            const valuePerToken = tokens > 0 ? (bestMarketPrice / tokens) : 0;
+            if (valuePerToken > bestValuePerToken) {
+              bestValuePerToken = valuePerToken;
+            }
+          }
+          if (bestValuePerToken > 0) {
+            price = bestValuePerToken; // ✅ override token price
+          }
+        }
+      }
+
+
+
       if ((marketItem.ask === undefined || marketItem.ask <= 0) && !useBidOnly) {
         if (!ignoreList.some(word => drop.name.includes(word))) {
           missingAskItems.push(drop.name);
@@ -501,17 +542,27 @@ async function fetchData() {
   avgTable.innerHTML = avgHtml;
 
   const allItemsTable = document.getElementById('all-items-table');
-  let allHtml = '<thead><tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>';
-  for (const itemName in allItems) {
-    const item = allItems[itemName];
-    allHtml += `<tr>
-    <td>${itemName}</td>
-    <td><input type="number" value="${customPrices[itemName]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
-    <td><input type="number" value="${customPrices[itemName]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
-    </tr>`;
+  let allHtml = '';
 
+  for (const dungeon in lootTables) {
+    allHtml += `<thead><tr><th colspan="3" style="background: var(--heading-color); color: white; font-size: 18px;">${dungeon}</th></tr>`;
+    allHtml += '<tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>';
+
+    const drops = lootTables[dungeon];
+    for (const drop of drops) {
+      const itemName = drop.name;
+      const item = allItems[itemName];
+      if (!item) continue; // Skip if item isn't in market
+      allHtml += `<tr>
+        <td>${itemName}</td>
+        <td><input type="number" value="${customPrices[itemName]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
+        <td><input type="number" value="${customPrices[itemName]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
+      </tr>`;
+    }
+
+    allHtml += '</tbody>';
   }
-  allHtml += '</tbody>';
+
   allItemsTable.innerHTML = allHtml;
 
   setupCollapsibles();
@@ -568,6 +619,40 @@ function setupCollapsibles() {
 
 
 
+const dungeons = {
+  'D1': {
+    'Chimerical Essence': 1,
+    'Griffin Leather': 600,
+    'Manticore Sting': 1000,
+    'Jackalope Antler': 1200,
+    'Dodocamel Plume': 3000,
+    'Griffin Talon': 3000
+  },
+  'D2': {
+    'Sinister Essence': 1,
+    "Acrobat's Ribbon": 2000,
+    "Magician's Cloth": 2000,
+    'Chaotic Chain': 3000,
+    'Cursed Ball': 3000
+  },
+  'D3': {
+    'Enchanted Essence': 1,
+    'Royal Cloth': 2000,
+    "Knight's Ingot": 2000,
+    "Bishop's Scroll": 2000,
+    'Regal Jewel': 3000,
+    'Sundering Jewel': 3000
+  },
+  'D4': {
+    'Pirate Essence': 1,
+    'Marksman Brooch': 2000,
+    'Corsair Crest': 2000,
+    'Damaged Anchor': 2000,
+    'Maelstrom Plating': 2000,
+    'Kraken Leather': 2000,
+    'Kraken Fang': 3000
+  }
+};
 
 
 
@@ -691,4 +776,3 @@ const lootTables = {
 Bagz ❤️ Goats
 </body>
 </html>
-
