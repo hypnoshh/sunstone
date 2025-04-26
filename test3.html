@@ -282,7 +282,7 @@ function formatNumber(num) {
 }
 
 async function fetchData() {
-  const response = await fetch('https://holychikenz.github.io/MWIApi/milkyapi.json');
+  const response = await fetch('https://holychikenz.github.io/MWIApi/medianmarket.json');
   const data = await response.json();
   const market = data.market;
   const time = data.time;
@@ -313,7 +313,7 @@ async function fetchData() {
     let averageValue = 0;
     let hasData = false;
     const missingAskItems = [];
-    const ignoreList = ['Token', 'Treasure', 'Coin', 'Cape'];
+    const ignoreList = ['Token', 'Treasure', 'Coin', 'Cape', 'Quiver', 'Cloak'];
     const loot = lootTables[dungeon];
     for (const drop of loot) {
       const marketItem = market[drop.name];
