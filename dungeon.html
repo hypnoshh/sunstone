@@ -29,9 +29,8 @@
     --table-hover-bg: #e1e4e8;
     --highlight-color: #ffd700;
   }
-  h1, h2 {
+  h1 {
     color: var(--heading-color);
-    cursor: pointer;
   }
   table {
     border-collapse: collapse;
@@ -86,6 +85,17 @@
     margin-top: 10px;
     width: 100%;
     border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .collapsible::after {
+    content: '\25B6'; /* Right-pointing arrow */
+    font-size: 16px;
+    transition: transform 0.3s;
+  }
+  .active::after {
+    transform: rotate(90deg); /* Downward-pointing when active */
   }
   .content {
     padding: 0 18px;
@@ -221,6 +231,7 @@ function setupCollapsibles() {
         const dungeon = coll[i].innerText;
         if (getCookie('collapse_' + dungeon) === 'open') {
             content.style.display = 'block';
+            coll[i].classList.add('active');
         }
         coll[i].addEventListener('click', function() {
             this.classList.toggle('active');
