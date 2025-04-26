@@ -261,6 +261,16 @@ input[type="checkbox"] {
 body {
   top: 0px !important;
 }
+.content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, padding 0.3s ease;
+}
+
+.content.show {
+  max-height: 1000px; /* plenty big */
+  padding-top: 10px;
+}
 
 </style>
 </head>
@@ -542,14 +552,11 @@ function setupCollapsibles() {
     coll[i].addEventListener('click', function() {
       this.classList.toggle('active');
       const content = this.nextElementSibling;
-      if (content.style.display === 'block') {
-        content.style.display = 'none';
-      } else {
-        content.style.display = 'block';
-      }
+      content.classList.toggle('show');
     });
   }
 }
+
 
 const lootTables = {
   'D1': [ // Chimerical Chest
