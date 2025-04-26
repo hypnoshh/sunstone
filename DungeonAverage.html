@@ -554,14 +554,17 @@ function setupCollapsibles() {
     coll[i].addEventListener('click', function() {
       this.classList.toggle('active');
       const content = this.nextElementSibling;
-      if (content.classList.contains('show')) {
-        content.classList.remove('show');
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        content.style.paddingTop = "0";
       } else {
-        content.classList.add('show');
+        content.style.maxHeight = content.scrollHeight + "px";
+        content.style.paddingTop = "10px";
       }
     });
   }
 }
+
 
 
 
