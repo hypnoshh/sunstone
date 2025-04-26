@@ -313,14 +313,18 @@ async function fetchData() {
     let averageValue = 0;
     let hasData = false;
     const missingAskItems = [];
+    const ignoreList = ['Token', 'Treasure', 'Coin', 'Cape'];
     const loot = lootTables[dungeon];
     for (const drop of loot) {
       const marketItem = market[drop.name];
       if (!marketItem) continue;
       const price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
       if ((marketItem.ask === undefined || marketItem.ask <= 0) && !useBidOnly) {
-        missingAskItems.push(drop.name);
+        if (!ignoreList.some(word => drop.name.includes(word))) {
+          missingAskItems.push(drop.name);
+        }
       }
+
       if (price <= 0) continue;
       hasData = true;
       const expectedQty = (drop.min + drop.max) / 2;
@@ -331,12 +335,10 @@ async function fetchData() {
     if (!hasData) {
       warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
     }
-    if (!hasData) {
-      warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
-    }
     for (const missingItem of missingAskItems) {
       warningsContent.innerHTML += `<div>⚠️ Missing Ask Price: ${missingItem} (${dungeon})</div>`;
     }
+
 
     let keyCostText = '';
     if (includeKeys && keyItems[dungeon]) {
