@@ -345,6 +345,7 @@ async function fetchData() {
     for (const drop of loot) {
       const marketItem = market[drop.name];
       if (!marketItem) continue;
+      const type = useBidOnly ? 'bid' : 'ask';
       let price = 0;
       if (customPrices[drop.name] && customPrices[drop.name][type]) {
         price = customPrices[itemName][type];
