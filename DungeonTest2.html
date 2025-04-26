@@ -190,43 +190,42 @@ function formatNumber(num) {
   return num.toFixed(0);
 }
 
-// --- Loot tables
 const lootTables = {
-    'D1': [
-        { name: 'Chimerical Essence', probability: 100, min: 400, max: 800 },
-        { name: 'Chimerical Essence', probability: 5, min: 2000, max: 4000 },
-        { name: 'Griffin Leather', probability: 10, min: 1, max: 1 },
-        { name: 'Manticore Sting', probability: 6, min: 1, max: 1 },
-        { name: 'Jackalope Antler', probability: 5, min: 1, max: 1 },
-        { name: 'Dodocamel Plume', probability: 2, min: 1, max: 1 },
-        { name: 'Griffin Talon', probability: 2, min: 1, max: 1 }
-    ],
-    'D2': [
-        { name: 'Sinister Essence', probability: 100, min: 400, max: 800 },
-        { name: 'Sinister Essence', probability: 5, min: 2000, max: 4000 },
-        { name: "Acrobat's Ribbon", probability: 4, min: 1, max: 1 },
-        { name: "Magician's Cloth", probability: 4, min: 1, max: 1 },
-        { name: 'Chaotic Chain', probability: 2, min: 1, max: 1 }
-    ],
-    'D3': [
-        { name: 'Enchanted Essence', probability: 100, min: 400, max: 800 },
-        { name: 'Enchanted Essence', probability: 5, min: 2000, max: 4000 },
-        { name: 'Royal Cloth', probability: 4, min: 1, max: 1 },
-        { name: "Knight's Ingot", probability: 4, min: 1, max: 1 },
-        { name: "Bishop's Scroll", probability: 4, min: 1, max: 1 },
-        { name: 'Regal Jewel', probability: 2, min: 1, max: 1 },
-        { name: 'Sundering Jewel', probability: 2, min: 1, max: 1 }
-    ],
-    'D4': [
-        { name: 'Pirate Essence', probability: 100, min: 400, max: 800 },
-        { name: 'Pirate Essence', probability: 5, min: 2000, max: 4000 },
-        { name: 'Marksman Brooch', probability: 3, min: 1, max: 1 },
-        { name: 'Corsair Crest', probability: 3, min: 1, max: 1 },
-        { name: 'Damaged Anchor', probability: 3, min: 1, max: 1 },
-        { name: 'Maelstrom Plating', probability: 3, min: 1, max: 1 },
-        { name: 'Kraken Leather', probability: 3, min: 1, max: 1 },
-        { name: 'Kraken Fang', probability: 3, min: 1, max: 1 }
-    ]
+  'D1': [
+    { name: 'Chimerical Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Chimerical Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Griffin Leather', probability: 10, min: 1, max: 1 },
+    { name: 'Manticore Sting', probability: 6, min: 1, max: 1 },
+    { name: 'Jackalope Antler', probability: 5, min: 1, max: 1 },
+    { name: 'Dodocamel Plume', probability: 2, min: 1, max: 1 },
+    { name: 'Griffin Talon', probability: 2, min: 1, max: 1 }
+  ],
+  'D2': [
+    { name: 'Sinister Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Sinister Essence', probability: 5, min: 2000, max: 4000 },
+    { name: "Acrobat's Ribbon", probability: 4, min: 1, max: 1 },
+    { name: "Magician's Cloth", probability: 4, min: 1, max: 1 },
+    { name: 'Chaotic Chain', probability: 2, min: 1, max: 1 }
+  ],
+  'D3': [
+    { name: 'Enchanted Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Enchanted Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Royal Cloth', probability: 4, min: 1, max: 1 },
+    { name: "Knight's Ingot", probability: 4, min: 1, max: 1 },
+    { name: "Bishop's Scroll", probability: 4, min: 1, max: 1 },
+    { name: 'Regal Jewel', probability: 2, min: 1, max: 1 },
+    { name: 'Sundering Jewel', probability: 2, min: 1, max: 1 }
+  ],
+  'D4': [
+    { name: 'Pirate Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Pirate Essence', probability: 5, min: 2000, max: 4000 },
+    { name: 'Marksman Brooch', probability: 3, min: 1, max: 1 },
+    { name: 'Corsair Crest', probability: 3, min: 1, max: 1 },
+    { name: 'Damaged Anchor', probability: 3, min: 1, max: 1 },
+    { name: 'Maelstrom Plating', probability: 3, min: 1, max: 1 },
+    { name: 'Kraken Leather', probability: 3, min: 1, max: 1 },
+    { name: 'Kraken Fang', probability: 3, min: 1, max: 1 }
+  ]
 };
 
 async function fetchData() {
@@ -312,6 +311,8 @@ function setupCollapsibles() {
     });
   }
 }
+
+
 </script>
 
 </script>
