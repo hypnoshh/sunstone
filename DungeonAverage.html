@@ -547,10 +547,12 @@ function setupCollapsibles() {
   const coll = document.getElementsByClassName('collapsible');
   for (let i = 0; i < coll.length; i++) {
     coll[i].addEventListener('click', function(event) {
-      // Ignore clicks if you're clicking inside an input or label
+      // 👇 Ignore clicks on inputs inside the collapsible
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'LABEL') {
+        event.stopPropagation();
         return;
       }
+
       this.classList.toggle('active');
       const content = this.nextElementSibling;
       if (content.style.maxHeight) {
@@ -563,6 +565,7 @@ function setupCollapsibles() {
     });
   }
 }
+
 
 
 
