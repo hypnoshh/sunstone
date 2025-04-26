@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <title>Dungeon Item Prices</title>
 <style>
-    body {
+  body {
     background: var(--bg-color);
     color: var(--text-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
   }
+
   :root {
     --bg-color: #0d1117;
     --text-color: #c9d1d9;
@@ -234,7 +236,7 @@ input[type="checkbox"] {
 </div>
 
 <div id="warnings" class="warning">
-  <button class="warning-collapsible">⚠️ Show Warnings</button>
+  <button class="warning-collapsible">⚠️ Show Warnings (Some price data is missing if it hasen't been on the market for 24 hours)</button>
   <div class="warning-content" id="warnings-content"></div>
 </div>
 
@@ -244,7 +246,7 @@ input[type="checkbox"] {
 <div id="loading-spinner"></div>
 
 <div>
-  <button class="collapsible">Show All Items Prices</button>
+  <button class="collapsible">Show All Items Prices (You can adjust them)</button>
   <div class="content">
     <table id="all-items-table" style="margin-top: 10px;"></table>
   </div>
@@ -622,4 +624,5 @@ const lootTables = {
 
 </body>
 </html>
+
 
