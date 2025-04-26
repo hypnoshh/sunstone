@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'zh-CN',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+  }
+  </script>
+  
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
 <title>Dungeon Item Prices</title>
 <style>
   body {
@@ -220,7 +232,7 @@ input[type="checkbox"] {
 <body>
 
 <h1>Dungeon Run Average</h1>
-
+<div id="google_translate_element" style="margin-bottom: 20px;"></div>
 <div style="margin-bottom: 20px;">
   <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="saveSettings(); fetchDataSmooth()"></label>
   <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="saveSettings(); fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
@@ -621,7 +633,7 @@ const lootTables = {
   ]
 };
 </script>
-
+Bagz ❤️ Goats
 </body>
 </html>
 
