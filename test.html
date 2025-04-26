@@ -127,7 +127,7 @@
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
   }
-  .tooltip {
+    .tooltip {
     position: relative;
     display: inline-block;
     cursor: pointer;
@@ -171,6 +171,13 @@
 
 <div id="dungeon-tables"></div>
 <div id="loading-spinner"></div>
+
+<div>
+  <button class="collapsible">Show All Items Prices</button>
+  <div class="content">
+    <table id="all-items-table" style="margin-top: 10px;"></table>
+  </div>
+</div>
 
 <div class="footer">
   Last Updated: <span id="last-updated"></span>
@@ -233,6 +240,7 @@ async function fetchData() {
   const avgTable = document.getElementById('average-values');
   let avgHtml = '<thead><tr><th>Dungeon</th><th>Avg Chest Value</th><th>Profit/Hour</th><th>Profit/Day</th></tr></thead><tbody>';
 
+  const allItems = {};
   const useBidOnly = document.getElementById('use-bid-only').checked;
 
   for (const dungeon in lootTables) {
@@ -245,6 +253,8 @@ async function fetchData() {
       if (price <= 0) continue;
       const expectedQty = (drop.min + drop.max) / 2;
       averageValue += (price * expectedQty) * (drop.probability / 100);
+
+      allItems[drop.name] = marketItem;
     }
 
     const runTimeMinutes = parseFloat(document.getElementById('run-time').value) || 10;
@@ -260,6 +270,15 @@ async function fetchData() {
 
   avgHtml += '</tbody>';
   avgTable.innerHTML = avgHtml;
+
+  const allItemsTable = document.getElementById('all-items-table');
+  let allHtml = '<thead><tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>';
+  for (const itemName in allItems) {
+    const item = allItems[itemName];
+    allHtml += `<tr><td>${itemName}</td><td>${item.ask !== undefined ? formatNumber(item.ask) : 'N/A'}</td><td>${item.bid !== undefined ? formatNumber(item.bid) : 'N/A'}</td></tr>`;
+  }
+  allHtml += '</tbody>';
+  allItemsTable.innerHTML = allHtml;
 
   setupCollapsibles();
 }
@@ -283,20 +302,13 @@ function fetchDataSmooth() {
 function setupCollapsibles() {
   const coll = document.getElementsByClassName('collapsible');
   for (let i = 0; i < coll.length; i++) {
-    const content = coll[i].nextElementSibling;
-    const dungeon = coll[i].innerText;
-    if (getCookie('collapse_' + dungeon) === 'open') {
-      content.style.display = 'block';
-      coll[i].classList.add('active');
-    }
     coll[i].addEventListener('click', function() {
       this.classList.toggle('active');
+      const content = this.nextElementSibling;
       if (content.style.display === 'block') {
         content.style.display = 'none';
-        setCookie('collapse_' + dungeon, 'closed', 365);
       } else {
         content.style.display = 'block';
-        setCookie('collapse_' + dungeon, 'open', 365);
       }
     });
   }
