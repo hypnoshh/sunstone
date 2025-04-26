@@ -288,7 +288,7 @@ body {
 </head>
 <body>
 
-<h1>Dungeon Calculator Average</h1>
+<h1>Dungeon Run Average</h1>
 <div id="google_translate_element" style="margin-bottom: 20px;"></div>
 <a href="./dungeon.html" class="cheat-sheet-btn">Token Cheat Sheet</a>
 
@@ -307,7 +307,7 @@ body {
 </div>
 
 <div id="warnings" class="warning">
-  <button class="warning-collapsible">⚠️ Show Warnings (Some price data is missing if it hasen't been on the market for 24 hours) (Click for more info)</button>
+  <button class="warning-collapsible">⚠️ Show Warnings (Some price data is missing if it hasen't been on the market for 24 hours)</button>
   <div class="warning-content" id="warnings-content"></div>
 </div>
 
@@ -317,7 +317,7 @@ body {
 <div id="loading-spinner"></div>
 
 <div>
-  <button class="collapsible">Show All Items Prices (You can adjust them) (Refresh if this brakes)</button>
+  <button class="collapsible">Show All Items Prices (You can adjust them)</button>
   <div class="content">
     <table id="all-items-table" style="margin-top: 10px;"></table>
   </div>
@@ -452,8 +452,13 @@ async function fetchData() {
       if (customPrices[drop.name] && customPrices[drop.name][type]) {
         price = customPrices[drop.name][type];
       } else {
-        price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
+        if (drop.name === 'Coin') {
+          price = 1; // ✅ Coins are always worth 1
+        } else {
+          price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
+        }
       }
+
 
       //  If it's a Token, adjust price to be based on best money/token value
       if (drop.name.includes('Token')) {
@@ -500,17 +505,22 @@ async function fetchData() {
 
 
     let keyCostText = '';
-    if (includeKeys && keyItems[dungeon]) {
-      for (const keyName of keyItems[dungeon]) {
-        const keyMarketItem = market[keyName];
-        if (keyMarketItem) {
+  if (keyItems[dungeon]) {
+    for (const keyName of keyItems[dungeon]) {
+      const keyMarketItem = market[keyName];
+      if (keyMarketItem) {
+        allItems[keyName] = keyMarketItem; // ✅ always add keys to dropdown
+        if (includeKeys) {
           const keyPrice = useBidOnly ? (keyMarketItem.bid ?? 0) : Math.max(keyMarketItem.ask ?? 0, keyMarketItem.bid ?? 0);
-          averageValue -= keyPrice;
-          allItems[keyName] = keyMarketItem;
+          averageValue -= keyPrice; // ✅ only subtract if setting is enabled
         }
       }
+    }
+    if (includeKeys) {
       keyCostText = ' <small>(after keys)</small>';
     }
+  }
+
 
     const runTimeMinutes = parseFloat(document.getElementById('run-time').value) || 10;
     const buffActive = document.getElementById('drop-buff').checked;
