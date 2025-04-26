@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dungeon Item Prices</title>
+<style>
+    body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  :root {
+    --bg-color: #0d1117;
+    --text-color: #c9d1d9;
+    --heading-color: #58a6ff;
+    --table-bg: #161b22;
+    --table-header-bg: #21262d;
+    --table-hover-bg: #21262d;
+    --highlight-color: #2ea043;
+  }
+  .light-mode {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --heading-color: #007acc;
+    --table-bg: #f3f3f3;
+    --table-header-bg: #d1d5da;
+    --table-hover-bg: #e1e4e8;
+    --highlight-color: #ffd700;
+  }
+  h1 {
+    color: var(--heading-color);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 30px;
+    background: var(--table-bg);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  th {
+    background: var(--table-header-bg);
+    color: var(--text-color);
+    font-weight: bold;
+    border-bottom: 1px solid #30363d;
+  }
+  tr:nth-child(even) { background: var(--table-bg); }
+  tr:nth-child(odd) { background: var(--bg-color); }
+  tr:hover { background: var(--table-hover-bg); }
+  .highlight { background: var(--highlight-color) !important; color: #000 !important; }
+  .refresh-btn, .theme-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #238636;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-right: 10px;
+  }
+  .refresh-btn:hover, .theme-btn:hover { background: #2ea043; }
+  .footer {
+    margin-top: 20px;
+    color: #8b949e;
+    font-size: 14px;
+  }
+  .collapsible {
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    text-align: left;
+    outline: none;
+    background-color: var(--heading-color);
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .collapsible::after {
+    content: '\25B6';
+    font-size: 16px;
+    transition: transform 0.3s;
+  }
+  .active::after {
+    transform: rotate(90deg);
+  }
+  .content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+  }
+  #average-values, #dungeon-tables {
+    transition: all 0.5s ease;
+    opacity: 1;
+    position: relative;
+  }
+  .fade-out {
+    opacity: 0;
+  }
+  #loading-spinner {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 5px solid var(--heading-color);
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 180px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -90px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+  .warning {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .negative {
+    color: #ff5555;
+    font-weight: bold;
+  }
+  .warning-collapsible {
+    cursor: pointer;
+    background-color: #fff3cd;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    width: 100%;
+    text-align: left;
+  }
+  .warning-content {
+    padding: 10px;
+    display: none;
+    background-color: #fff8e1;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Dungeon Run Average</h1>
+
+<div style="margin-bottom: 20px;">
+  <label>Dungeon Run Time (minutes): <input type="number" id="run-time" value="10" min="1" onchange="saveSettings(); fetchDataSmooth()"></label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="drop-buff" onchange="saveSettings(); fetchDataSmooth()"> Drop Quantity Buff (29.5%)</label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="use-bid-only" onchange="saveSettings(); fetchDataSmooth()"> Use Bid Price Only
+    <span class="tooltip">❔<span class="tooltiptext">Check to use only bid price instead of best of ask/bid.</span></span>
+  </label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="include-keys" onchange="saveSettings(); fetchDataSmooth()"> Include Key Prices
+    <span class="tooltip">❔<span class="tooltiptext">Subtract Chest Key and Entry Key prices from profit.</span></span>
+  </label>
+  <label style="margin-left: 20px;"><input type="checkbox" id="use-median" onchange="saveSettings(); fetchDataSmooth()"> Use Median Price
+    <span class="tooltip">❔<span class="tooltiptext">Use the average prices over the last 24 hours</span></span>
+  </label>
+</div>
+
+<div id="warnings" class="warning">
+  <button class="warning-collapsible">⚠️ Show Warnings</button>
+  <div class="warning-content" id="warnings-content"></div>
+</div>
+
+<table id="average-values" style="margin-bottom: 30px;"></table>
+
+<div id="dungeon-tables"></div>
+<div id="loading-spinner"></div>
+
+<div>
+  <button class="collapsible">Show All Items Prices</button>
+  <div class="content">
+    <table id="all-items-table" style="margin-top: 10px;"></table>
+  </div>
+</div>
+
+<div class="footer">
+  Last Updated: <span id="last-updated"></span>
+</div>
+
+<form method="post">
+  <button class="refresh-btn" onclick="window.location.reload(); return false;">Refresh</button>
+  <button class="theme-btn" type="button" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+</form>
+
+<script>
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
+  document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/';
+}
+
+function getCookie(name) {
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') { c = c.substring(1); }
+    if (c.indexOf(name + '=') == 0) { return c.substring(name.length + 1, c.length); }
+  }
+  return '';
+}
+function saveSettings() {
+  setCookie('dropBuff', document.getElementById('drop-buff').checked, 365);
+  setCookie('useBidOnly', document.getElementById('use-bid-only').checked, 365);
+  setCookie('includeKeys', document.getElementById('include-keys').checked, 365);
+  setCookie('useMedian', document.getElementById('use-median').checked, 365);
+  setCookie('runTime', document.getElementById('run-time').value, 365);
+}
+
+function loadSettings() {
+  document.getElementById('drop-buff').checked = getCookie('dropBuff') === 'true';
+  document.getElementById('use-bid-only').checked = getCookie('useBidOnly') === 'true';
+  document.getElementById('include-keys').checked = getCookie('includeKeys') === 'true';
+  const medianSetting = getCookie('useMedian');
+  document.getElementById('use-median').checked = medianSetting === '' ? true : (medianSetting === 'true');
+
+  const savedRunTime = getCookie('runTime');
+  if (savedRunTime) {
+    document.getElementById('run-time').value = savedRunTime;
+  }
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  setCookie('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark', 365);
+}
+
+window.onload = function() {
+  if (getCookie('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+  loadSettings();
+  fetchData();
+  setupWarningToggle();
+};
+
+function setupWarningToggle() {
+  const coll = document.querySelector('.warning-collapsible');
+  const content = document.querySelector('.warning-content');
+  coll.addEventListener('click', function() {
+    this.classList.toggle('active');
+    if (content.style.display === 'block') {
+      content.style.display = 'none';
+    } else {
+      content.style.display = 'block';
+    }
+  });
+}
+
+function formatNumber(num) {
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+  return num.toFixed(0);
+}
+
+async function fetchData() {
+  const useMedian = document.getElementById('use-median').checked;
+  const apiUrl = useMedian
+    ? 'https://holychikenz.github.io/MWIApi/medianmarket.json'
+    : 'https://holychikenz.github.io/MWIApi/milkyapi.json';
+
+  const response = await fetch(apiUrl);
+  const data = await response.json();
+  const market = data.market;
+  const time = data.time;
+  const lastUpdated = document.getElementById('last-updated');
+  if (lastUpdated) {
+    lastUpdated.textContent = new Date(time * 1000).toLocaleString();
+  }
+
+  const container = document.getElementById('dungeon-tables');
+  container.innerHTML = '';
+  const avgTable = document.getElementById('average-values');
+  const warningsContent = document.getElementById('warnings-content');
+  warningsContent.innerHTML = '';
+  let avgHtml = '<thead><tr><th>Dungeon</th><th>Avg Chest Value</th><th>Profit/Hour</th><th>Profit/Day</th></tr></thead><tbody>';
+
+  const allItems = {};
+  const useBidOnly = document.getElementById('use-bid-only').checked;
+  const includeKeys = document.getElementById('include-keys').checked;
+
+  const keyItems = {
+    'D1': ['Chimerical Chest Key', 'Chimerical Entry Key'],
+    'D2': ['Sinister Chest Key', 'Sinister Entry Key'],
+    'D3': ['Enchanted Chest Key', 'Enchanted Entry Key'],
+    'D4': ['Pirate Chest Key', 'Pirate Entry Key']
+  };
+
+  for (const dungeon in lootTables) {
+    let averageValue = 0;
+    let hasData = false;
+    const missingAskItems = [];
+    const ignoreList = ['Token', 'Treasure', 'Coin', 'Cape', 'Quiver', 'Cloak'];
+    const loot = lootTables[dungeon];
+    for (const drop of loot) {
+      const marketItem = market[drop.name];
+      if (!marketItem) continue;
+      let price = 0;
+      if (customPrices[itemName] && customPrices[itemName][type]) {
+        price = customPrices[itemName][type];
+      } else {
+        price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
+      }
+
+      if ((marketItem.ask === undefined || marketItem.ask <= 0) && !useBidOnly) {
+        if (!ignoreList.some(word => drop.name.includes(word))) {
+          missingAskItems.push(drop.name);
+        }
+      }
+
+      if (price <= 0) continue;
+      hasData = true;
+      const expectedQty = (drop.min + drop.max) / 2;
+      averageValue += (price * expectedQty) * (drop.probability / 100);
+      allItems[drop.name] = marketItem;
+    }
+
+    if (!hasData) {
+      warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
+    }
+    for (const missingItem of missingAskItems) {
+      warningsContent.innerHTML += `<div>⚠️ Missing Ask Price: ${missingItem} (${dungeon})</div>`;
+    }
+
+
+    let keyCostText = '';
+    if (includeKeys && keyItems[dungeon]) {
+      for (const keyName of keyItems[dungeon]) {
+        const keyMarketItem = market[keyName];
+        if (keyMarketItem) {
+          const keyPrice = useBidOnly ? (keyMarketItem.bid ?? 0) : Math.max(keyMarketItem.ask ?? 0, keyMarketItem.bid ?? 0);
+          averageValue -= keyPrice;
+          allItems[keyName] = keyMarketItem;
+        }
+      }
+      keyCostText = ' <small>(after keys)</small>';
+    }
+
+    const runTimeMinutes = parseFloat(document.getElementById('run-time').value) || 10;
+    const buffActive = document.getElementById('drop-buff').checked;
+    const buffMultiplier = buffActive ? 1.295 : 1;
+
+    const runsPerHour = 60 / runTimeMinutes;
+    const profitPerHour = averageValue * runsPerHour * buffMultiplier;
+    const profitPerDay = profitPerHour * 24;
+
+    const formattedAverage = formatNumber(Math.abs(averageValue));
+    const avgValueFormatted = averageValue < 0 
+      ? `<span class="negative">-${formattedAverage}</span>` 
+      : formattedAverage;
+
+
+      const formattedProfitHour = profitPerHour < 0
+        ? `<span class="negative">-${formatNumber(Math.abs(profitPerHour))}</span>`
+        : formatNumber(profitPerHour);
+
+      const formattedProfitDay = profitPerDay < 0
+        ? `<span class="negative">-${formatNumber(Math.abs(profitPerDay))}</span>`
+        : formatNumber(profitPerDay);
+
+      avgHtml += `<tr><td>${dungeon}</td><td>${avgValueFormatted}${keyCostText}</td><td>${formattedProfitHour}</td><td>${formattedProfitDay}</td></tr>`;
+
+  }
+
+  avgHtml += '</tbody>';
+  avgTable.innerHTML = avgHtml;
+
+  const allItemsTable = document.getElementById('all-items-table');
+  let allHtml = '<thead><tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>';
+  for (const itemName in allItems) {
+    const item = allItems[itemName];
+    allHtml += `<tr>
+    <td>${itemName}</td>
+    <td><input type="number" value="${item.ask !== undefined ? item.ask : ''}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
+    <td><input type="number" value="${item.bid !== undefined ? item.bid : ''}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
+    </tr>`;
+
+  }
+  allHtml += '</tbody>';
+  allItemsTable.innerHTML = allHtml;
+
+  setupCollapsibles();
+}
+
+function fetchDataSmooth() {
+  const avgTable = document.getElementById('average-values');
+  avgTable.style.opacity = 0.5;
+  setTimeout(() => {
+    fetchData();
+    avgTable.style.opacity = 1;
+  }, 200);
+}
+
+const customPrices = {};
+
+function updateCustomPrice(input) {
+  const item = input.getAttribute('data-item');
+  const type = input.getAttribute('data-type');
+  const value = parseFloat(input.value) || 0;
+  
+  if (!customPrices[item]) customPrices[item] = {};
+  customPrices[item][type] = value;
+
+  // Update everything live when user edits
+  fetchData();
+}
+
+
+function setupCollapsibles() {
+  const coll = document.getElementsByClassName('collapsible');
+  for (let i = 0; i < coll.length; i++) {
+    coll[i].addEventListener('click', function() {
+      this.classList.toggle('active');
+      const content = this.nextElementSibling;
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+      } else {
+        content.style.display = 'block';
+      }
+    });
+  }
+}
+
+const lootTables = {
+  'D1': [ // Chimerical Chest
+    { name: 'Chimerical Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Chimerical Essence', probability: 5.0, min: 2000, max: 4000 },
+    { name: 'Chimerical Token', probability: 100, min: 250, max: 500 },
+    { name: 'Chimerical Token', probability: 5.0, min: 1500, max: 3000 },
+    { name: 'Large Treasure Chest', probability: 30.0, min: 1, max: 5 },
+    { name: 'Jade', probability: 60.0, min: 5, max: 20 },
+    { name: 'Sunstone', probability: 50.0, min: 1, max: 1 },
+    { name: 'Crippling Slash', probability: 50.0, min: 1, max: 2 },
+    { name: 'Pestilent Shot', probability: 50.0, min: 1, max: 2 },
+    { name: 'Griffin Leather', probability: 10.0, min: 1, max: 1 },
+    { name: 'Manticore Sting', probability: 6.0, min: 1, max: 1 },
+    { name: 'Jackalope Antler', probability: 5.0, min: 1, max: 1 },
+    { name: 'Dodocamel Plume', probability: 2.0, min: 1, max: 1 },
+    { name: 'Griffin Talon', probability: 2.0, min: 1, max: 1 },
+    { name: 'Chimerical Chest Key', probability: 2.0, min: 1, max: 1 },
+    { name: 'Chimerical Quiver', probability: 3.0, min: 1, max: 1 },
+    { name: 'Griffin Tunic', probability: 0.3, min: 1, max: 1 },
+    { name: 'Griffin Chaps', probability: 0.3, min: 1, max: 1 },
+    { name: 'Manticore Shield', probability: 0.3, min: 1, max: 1 },
+    { name: 'Jackalope Staff', probability: 0.2, min: 1, max: 1 },
+    { name: 'Dodocamel Gauntlets', probability: 0.15, min: 1, max: 1 },
+    { name: 'Griffin Bulwark', probability: 0.05, min: 1, max: 1 }
+  ],
+  'D2': [ // Sinister Chest
+    { name: 'Sinister Essence', probability: 100.0, min: 400, max: 800 },
+    { name: 'Sinister Essence', probability: 5.0, min: 2000, max: 4000 },
+    { name: 'Sinister Token', probability: 100.0, min: 250, max: 500 },
+    { name: 'Sinister Token', probability: 5.0, min: 1500, max: 3000 },
+    { name: 'Large Treasure Chest', probability: 30.0, min: 1, max: 6 },
+    { name: 'Garnet', probability: 60.0, min: 5, max: 20 },
+    { name: 'Sunstone', probability: 50.0, min: 1, max: 3 },
+    { name: 'Penetrating Strike', probability: 50.0, min: 1, max: 2 },
+    { name: 'Pestilent Shot', probability: 50.0, min: 1, max: 2 },
+    { name: 'Smoke Burst', probability: 50.0, min: 1, max: 2 },
+    { name: "Acrobat's Ribbon", probability: 4.0, min: 1, max: 1 },
+    { name: "Magician's Cloth", probability: 4.0, min: 1, max: 1 },
+    { name: 'Chaotic Chain', probability: 2.0, min: 1, max: 1 },
+    { name: 'Sinister Chest Key', probability: 2.0, min: 1, max: 1 },
+    { name: 'Sinister Cape', probability: 4.0, min: 1, max: 1 },
+    { name: 'Acrobatic Hood', probability: 0.2, min: 1, max: 1 },
+    { name: "Magician's Hat", probability: 0.2, min: 1, max: 1 },
+    { name: 'Chaotic Flail', probability: 0.05, min: 1, max: 1 },
+    { name: 'Cursed Bow', probability: 0.05, min: 1, max: 1 }
+  ],
+  'D3': [ // Enchanted Chest
+    { name: 'Enchanted Essence', probability: 100, min: 400, max: 800 },
+    { name: 'Enchanted Essence', probability: 5.0, min: 2000, max: 4000 },
+    { name: 'Enchanted Token', probability: 100, min: 250, max: 500 },
+    { name: 'Enchanted Token', probability: 5.0, min: 1500, max: 3000 },
+    { name: 'Large Treasure Chest', probability: 30.0, min: 1, max: 7 },
+    { name: 'Amethyst', probability: 60.0, min: 5, max: 20 },
+    { name: 'Sunstone', probability: 50.0, min: 1, max: 5 },
+    { name: 'Crippling Slash', probability: 50.0, min: 1, max: 2 },
+    { name: 'Penetrating Shot', probability: 50.0, min: 1, max: 2 },
+    { name: 'Arcane Reflection', probability: 50.0, min: 1, max: 2 },
+    { name: 'Mana Spring', probability: 50.0, min: 1, max: 2 },
+    { name: "Knight's Ingot", probability: 4.0, min: 1, max: 1 },
+    { name: "Bishop's Scroll", probability: 4.0, min: 1, max: 1 },
+    { name: 'Royal Cloth', probability: 4.0, min: 1, max: 1 },
+    { name: 'Regal Jewel', probability: 2.0, min: 1, max: 1 },
+    { name: 'Sundering Jewel', probability: 2.0, min: 1, max: 1 },
+    { name: 'Enchanted Chest Key', probability: 2.0, min: 1, max: 1 },
+    { name: 'Enchanted Cloak', probability: 4.0, min: 1, max: 1 },
+    { name: "Knight's Aegis", probability: 0.2, min: 1, max: 1 },
+    { name: "Bishop's Codex", probability: 0.2, min: 1, max: 1 },
+    { name: 'Royal Water Robe Top', probability: 0.04, min: 1, max: 1 },
+    { name: 'Royal Water Robe Bottoms', probability: 0.04, min: 1, max: 1 },
+    { name: 'Royal Nature Robe Top', probability: 0.04, min: 1, max: 1 },
+    { name: 'Royal Nature Robe Bottoms', probability: 0.04, min: 1, max: 1 },
+    { name: 'Royal Fire Robe Top', probability: 0.04, min: 1, max: 1 },
+    { name: 'Royal Fire Robe Bottoms', probability: 0.04, min: 1, max: 1 },
+    { name: 'Regal Sword', probability: 0.05, min: 1, max: 1 },
+    { name: 'Sundering Crossbow', probability: 0.05, min: 1, max: 1 }
+  ],
+  'D4': [ // Pirate Chest
+    { name: 'Pirate Essence', probability: 100.0, min: 400, max: 800 },
+    { name: 'Pirate Essence', probability: 5.0, min: 2000, max: 4000 },
+    { name: 'Pirate Token', probability: 100.0, min: 250, max: 500 },
+    { name: 'Pirate Token', probability: 5.0, min: 1500, max: 3000 },
+    { name: 'Large Treasure Chest', probability: 30.0, min: 1, max: 8 },
+    { name: 'Moonstone', probability: 50.0, min: 5, max: 20 },
+    { name: 'Sunstone', probability: 50.0, min: 1, max: 6 },
+    { name: 'Shield Bash', probability: 50.0, min: 1, max: 2 },
+    { name: 'Fracturing Impact', probability: 50.0, min: 1, max: 2 },
+    { name: 'Life Drain', probability: 50.0, min: 1, max: 2 },
+    { name: 'Marksman Brooch', probability: 3.0, min: 1, max: 1 },
+    { name: 'Corsair Crest', probability: 3.0, min: 1, max: 1 },
+    { name: 'Damaged Anchor', probability: 3.0, min: 1, max: 1 },
+    { name: 'Maelstrom Plating', probability: 3.0, min: 1, max: 1 },
+    { name: 'Kraken Leather', probability: 3.0, min: 1, max: 1 },
+    { name: 'Kraken Fang', probability: 3.0, min: 1, max: 1 },
+    { name: 'Pirate Chest Key', probability: 2.0, min: 1, max: 1 },
+    { name: 'Marksman Bracers', probability: 0.2, min: 1, max: 1 },
+    { name: 'Corsair Helmet', probability: 0.2, min: 1, max: 1 },
+    { name: 'Anchorbound Plate Body', probability: 0.04, min: 1, max: 1 },
+    { name: 'Anchorbound Plate Legs', probability: 0.04, min: 1, max: 1 },
+    { name: 'Maelstrom Plate Body', probability: 0.04, min: 1, max: 1 },
+    { name: 'Maelstrom Plate Legs', probability: 0.04, min: 1, max: 1 },
+    { name: 'Kraken Tunic', probability: 0.04, min: 1, max: 1 },
+    { name: 'Kraken Chaps', probability: 0.04, min: 1, max: 1 },
+    { name: 'Rippling Trident', probability: 0.03, min: 1, max: 1 },
+    { name: 'Blooming Trident', probability: 0.03, min: 1, max: 1 },
+    { name: 'Blazing Trident', probability: 0.03, min: 1, max: 1 }
+  ],
+  'LargeTreasureChest': [
+    { name: 'Coin', probability: 100, min: 30000, max: 60000 },
+    { name: 'Coin', probability: 10.0, min: 150000, max: 300000 },
+    { name: 'Pearl', probability: 60.0, min: 1, max: 3 },
+    { name: 'Amber', probability: 40.0, min: 1, max: 3 },
+    { name: 'Garnet', probability: 40.0, min: 1, max: 3 },
+    { name: 'Jade', probability: 40.0, min: 1, max: 3 },
+    { name: 'Moonstone', probability: 40.0, min: 1, max: 2 }
+  ]
+};
+</script>
+
+</body>
+</html>
