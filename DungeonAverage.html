@@ -561,7 +561,17 @@ async function fetchData() {
       const drops = lootTables[dungeon] || [];
       const keys = keyItems[dungeon] || [];
 
-      const combinedItems = [...drops.map(d => d.name), ...keys];
+      // 📋 Filter out Tokens, Essences, Coins from dropdown
+      const filteredDrops = drops
+        .map(d => d.name)
+        .filter(name => 
+          !name.includes('Essence') && 
+          !name.includes('Token') && 
+          name !== 'Coin'
+        );
+
+      const combinedItems = [...filteredDrops, ...keys];
+
 
       for (const itemName of combinedItems) {
         const item = allItems[itemName];
