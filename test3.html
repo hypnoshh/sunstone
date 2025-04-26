@@ -202,6 +202,9 @@
     <input type="checkbox" id="include-keys" onchange="fetchDataSmooth()"> Include Key Prices
     <span class="tooltip">❔<span class="tooltiptext">Subtract Chest Key and Entry Key prices from profit.</span></span>
   </label>
+  <label style="margin-left: 20px;">
+    <input type="checkbox" id="use-median" onchange="fetchDataSmooth()"> Use Median Prices 24Hr/Current Prices
+  </label>
 </div>
 
 <div id="warnings" class="warning">
@@ -282,7 +285,12 @@ function formatNumber(num) {
 }
 
 async function fetchData() {
-  const response = await fetch('https://holychikenz.github.io/MWIApi/medianmarket.json');
+  const useMedian = document.getElementById('use-median').checked;
+  const apiUrl = useMedian
+    ? 'https://holychikenz.github.io/MWIApi/medianmarket.json'
+    : 'https://holychikenz.github.io/MWIApi/milkyapi.json';
+
+  const response = await fetch(apiUrl);
   const data = await response.json();
   const market = data.market;
   const time = data.time;
