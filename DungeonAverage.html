@@ -348,7 +348,7 @@ async function fetchData() {
       const type = useBidOnly ? 'bid' : 'ask';
       let price = 0;
       if (customPrices[drop.name] && customPrices[drop.name][type]) {
-        price = customPrices[itemName][type];
+        price = customPrices[drop.name][type];
       } else {
         price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
       }
