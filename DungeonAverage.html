@@ -546,7 +546,11 @@ function updateCustomPrice(input) {
 function setupCollapsibles() {
   const coll = document.getElementsByClassName('collapsible');
   for (let i = 0; i < coll.length; i++) {
-    coll[i].addEventListener('click', function() {
+    coll[i].addEventListener('click', function(event) {
+      // Ignore clicks if you're clicking inside an input or label
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'LABEL') {
+        return;
+      }
       this.classList.toggle('active');
       const content = this.nextElementSibling;
       if (content.style.maxHeight) {
@@ -559,6 +563,7 @@ function setupCollapsibles() {
     });
   }
 }
+
 
 
 
