@@ -211,6 +211,33 @@ async function fetchData() {
         }
     };
 
+    const dungeonItemNamesEN = {
+        '/items/chimerical_essence': "Chimerical Essence",
+        '/items/griffin_leather': "Griffin Leather",
+        '/items/manticore_sting': "Manticore Sting",
+        '/items/jackalope_antler': "Jackalope Antler",
+        '/items/dodocamel_plume': "Dodocamel Plume",
+        '/items/griffin_talon': "Griffin Talon",
+        '/items/sinister_essence': "Sinister Essence",
+        "/items/acrobats_ribbon": "Acrobat's Ribbon",
+        "/items/magicians_cloth": "Magician's Cloth",
+        '/items/chaotic_chain': "Chaotic Chain",
+        '/items/cursed_ball': "Cursed Ball",
+        '/items/enchanted_essence': "Enchanted Essence",
+        '/items/royal_cloth': "Royal Cloth",
+        '/items/knights_ingot': "Knight's Ingot",
+        '/items/bishops_scroll': "Bishop's Scroll",
+        '/items/regal_jewel': "Regal Jewel",
+        '/items/sundering_jewel': "Sundering Jewel",
+        '/items/pirate_essence': "Pirate Essence",
+        '/items/marksman_brooch': "Marksman's Brooch",
+        '/items/corsair_crest': "Corsair Crest",
+        '/items/damaged_anchor': "Damaged Anchor",
+        '/items/maelstrom_plating': "Maelstrom Plating",
+        '/items/kraken_leather': "Kraken Leather",
+        '/items/kraken_fang': "Kraken Fang"
+    };
+
     const container = document.getElementById('dungeon-tables');
 
     for (const dungeon in dungeons) {
@@ -238,7 +265,7 @@ async function fetchData() {
 
         let html = `<button class="collapsible">${dungeon}</button><div class="content"><table><thead><tr><th>Item</th><th>Tokens</th><th>Ask Price</th><th>Bid Price</th><th>Money per Token</th></tr></thead><tbody>`;
         for (const row of rows) {
-            html += `<tr class="${bestItems.includes(row.item) ? 'highlight' : ''}"><td>${row.item}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
+            html += `<tr class="${bestItems.includes(row.item) ? 'highlight' : ''}"><td>${dungeonItemNamesEN[row.item]}</td><td>${row.tokens}</td><td>${row.ask !== -1 ? row.ask.toLocaleString() : 'N/A'}</td><td>${row.bid !== -1 ? row.bid.toLocaleString() : 'N/A'}</td><td>${row.valuePerToken.toFixed(2)}</td></tr>`;
         }
         html += '</tbody></table></div>';
         container.innerHTML += html;
