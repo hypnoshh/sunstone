@@ -289,7 +289,7 @@ body {
 <body>
 
 <h1>Dungeon Run Average</h1>
-  <h1>HolyChickenz api is gone, the official api has a different format so until I get around to reworking all my code this is dead</h1>
+
 <div id="google_translate_element" style="margin-bottom: 20px;"></div>
 <a href="./dungeon.html" class="cheat-sheet-btn">Token Cheat Sheet</a>
 
@@ -353,7 +353,7 @@ function saveSettings() {
   setCookie('dropBuff', document.getElementById('drop-buff').checked, 365);
   setCookie('useBidOnly', document.getElementById('use-bid-only').checked, 365);
   setCookie('includeKeys', document.getElementById('include-keys').checked, 365);
-  setCookie('useMedian', document.getElementById('use-median').checked, 365);
+  //setCookie('useMedian', document.getElementById('use-median').checked, 365);
   setCookie('runTime', document.getElementById('run-time').value, 365);
 }
 
@@ -361,8 +361,8 @@ function loadSettings() {
   document.getElementById('drop-buff').checked = getCookie('dropBuff') === 'true';
   document.getElementById('use-bid-only').checked = getCookie('useBidOnly') === 'true';
   document.getElementById('include-keys').checked = getCookie('includeKeys') !== 'false';
-  const medianSetting = getCookie('useMedian');
-  document.getElementById('use-median').checked = medianSetting === '' ? true : (medianSetting === 'true');
+  //const medianSetting = getCookie('useMedian');
+  //document.getElementById('use-median').checked = medianSetting === '' ? true : (medianSetting === 'true');
   
   const savedRunTime = getCookie('runTime');
   if (savedRunTime) {
@@ -405,15 +405,18 @@ function formatNumber(num) {
 }
 
 async function fetchData() {
-  const useMedian = document.getElementById('use-median').checked;
-  const apiUrl = useMedian
-    ? 'https://holychikenz.github.io/MWIApi/medianmarket.json'
-    : 'https://holychikenz.github.io/MWIApi/milkyapi.json';
+  //const useMedian = document.getElementById('use-median').checked;
+  //const apiUrl = useMedian
+  //  ? 'https://holychikenz.github.io/MWIApi/medianmarket.json'
+  //  : 'https://holychikenz.github.io/MWIApi/milkyapi.json';
 
-  const response = await fetch(apiUrl);
+  const response = await fetch('https://www.milkywayidle.com/game_data/marketplace.json');
   const data = await response.json();
-  const market = data.market;
-  const time = data.time;
+
+
+  const market = data.marketData;
+  const time = data.timestamp;
+
   const lastUpdated = document.getElementById('last-updated');
   if (lastUpdated) {
     lastUpdated.textContent = new Date(time * 1000).toLocaleString();
@@ -431,10 +434,10 @@ async function fetchData() {
   const includeKeys = document.getElementById('include-keys').checked;
 
   const keyItems = {
-    'D1': ['Chimerical Chest Key', 'Chimerical Entry Key'],
-    'D2': ['Sinister Chest Key', 'Sinister Entry Key'],
-    'D3': ['Enchanted Chest Key', 'Enchanted Entry Key'],
-    'D4': ['Pirate Chest Key', 'Pirate Entry Key']
+    'D1': ['/items/chimerical_chest_key', '/items/chimerical_entry_key'],
+    'D2': ['/items/sinister_chest_key', '/items/sinister_entry_key'],
+    'D3': ['/items/enchanted_chest_key', '/items/enchanted_entry_key'],
+    'D4': ['/items/pirate_chest_key', '/items/pirate_entry_key']
   };
 
   for (const dungeon in lootTables) {
@@ -444,9 +447,16 @@ async function fetchData() {
     const ignoreList = ['Token', 'Treasure', 'Coin', 'Cape', 'Quiver', 'Cloak'];
     const loot = lootTables[dungeon];
     for (const drop of loot) {
-      const marketItem = market[drop.name];
+      //See if it's really in the JSON. Hack to make work on offical API vs HolyChickenz
+      //Everything is in [0] in offical API. HolyChickenz didn't have that
+      if (drop.name.includes('/item') ) {
+        marketItem = market[drop.name][0];
+      }
+      else{
+        marketItem = drop.name;
+      }
       if (!marketItem) continue;
-      const type = useBidOnly ? 'bid' : 'ask';
+      const type = useBidOnly ? 'b' : 'a';
       let price = 0;
       if (customPrices[drop.name] && customPrices[drop.name][type]) {
         price = customPrices[drop.name][type];
@@ -454,7 +464,7 @@ async function fetchData() {
         if (drop.name === 'Coin') {
           price = 1; // ✅ Coins are always worth 1
         } else {
-          price = useBidOnly ? (marketItem.bid ?? 0) : Math.max(marketItem.ask ?? 0, marketItem.bid ?? 0);
+          price = useBidOnly ? (marketItem.b ?? 0) : Math.max(marketItem.a ?? 0, marketItem.b ?? 0);
         }
       }
 
@@ -466,9 +476,9 @@ async function fetchData() {
           let bestValuePerToken = 0;
           for (const item in tokenItems) {
             const tokens = tokenItems[item];
-            const itemMarket = market[item];
+            const itemMarket = market[item][0];
             if (!itemMarket) continue;
-            const bestMarketPrice = useBidOnly ? (itemMarket.bid ?? 0) : Math.max(itemMarket.ask ?? 0, itemMarket.bid ?? 0);
+            const bestMarketPrice = useBidOnly ? (itemMarket.b ?? 0) : Math.max(itemMarket.a ?? 0, itemMarket.b ?? 0);
             const valuePerToken = tokens > 0 ? (bestMarketPrice / tokens) : 0;
             if (valuePerToken > bestValuePerToken) {
               bestValuePerToken = valuePerToken;
@@ -482,7 +492,7 @@ async function fetchData() {
 
 
 
-      if ((marketItem.ask === undefined || marketItem.ask <= 0) && !useBidOnly) {
+      if ((marketItem.a === undefined || marketItem.a <= 0) && !useBidOnly) {
         if (!ignoreList.some(word => drop.name.includes(word))) {
           missingAskItems.push(drop.name);
         }
@@ -506,11 +516,11 @@ async function fetchData() {
     let keyCostText = '';
   if (keyItems[dungeon]) {
     for (const keyName of keyItems[dungeon]) {
-      const keyMarketItem = market[keyName];
+      const keyMarketItem = market[keyName][0];
       if (keyMarketItem) {
         allItems[keyName] = keyMarketItem; // ✅ always add keys to dropdown
         if (includeKeys) {
-          const keyPrice = useBidOnly ? (keyMarketItem.bid ?? 0) : Math.max(keyMarketItem.ask ?? 0, keyMarketItem.bid ?? 0);
+          const keyPrice = useBidOnly ? (keyMarketItem.b ?? 0) : Math.max(keyMarketItem.a ?? 0, keyMarketItem.b ?? 0);
           averageValue -= keyPrice; // ✅ only subtract if setting is enabled
         }
       }
@@ -573,8 +583,8 @@ async function fetchData() {
         if (!item) continue; // skip if no market data
         allHtml += `<tr>
           <td>${itemName}</td>
-          <td><input type="number" value="${customPrices[itemName]?.ask ?? (item.ask !== undefined ? item.ask : '')}" data-item="${itemName}" data-type="ask" onchange="updateCustomPrice(this)"></td>
-          <td><input type="number" value="${customPrices[itemName]?.bid ?? (item.bid !== undefined ? item.bid : '')}" data-item="${itemName}" data-type="bid" onchange="updateCustomPrice(this)"></td>
+          <td><input type="number" value="${customPrices[itemName]?.a ?? (item.a !== undefined ? item.a : '')}" data-item="${itemName}" data-type="a" onchange="updateCustomPrice(this)"></td>
+          <td><input type="number" value="${customPrices[itemName]?.b ?? (item.b !== undefined ? item.b : '')}" data-item="${itemName}" data-type="b" onchange="updateCustomPrice(this)"></td>
         </tr>`;
       }
 
@@ -639,67 +649,68 @@ function setupCollapsibles() {
 
 
 const dungeons = {
-  'D1': {
-    'Chimerical Essence': 1,
-    'Griffin Leather': 600,
-    'Manticore Sting': 1000,
-    'Jackalope Antler': 1200,
-    'Dodocamel Plume': 3000,
-    'Griffin Talon': 3000
-  },
-  'D2': {
-    'Sinister Essence': 1,
-    "Acrobat's Ribbon": 2000,
-    "Magician's Cloth": 2000,
-    'Chaotic Chain': 3000,
-    'Cursed Ball': 3000
-  },
-  'D3': {
-    'Enchanted Essence': 1,
-    'Royal Cloth': 2000,
-    "Knight's Ingot": 2000,
-    "Bishop's Scroll": 2000,
-    'Regal Jewel': 3000,
-    'Sundering Jewel': 3000
-  },
-  'D4': {
-    'Pirate Essence': 1,
-    'Marksman Brooch': 2000,
-    'Corsair Crest': 2000,
-    'Damaged Anchor': 2000,
-    'Maelstrom Plating': 2000,
-    'Kraken Leather': 2000,
-    'Kraken Fang': 3000
-  }
-};
+        'D1': {
+            '/items/chimerical_essence': 1,
+            '/items/griffin_leather': 600,
+            '/items/manticore_sting': 1000,
+            '/items/jackalope_antler': 1200,
+            '/items/dodocamel_plume': 3000,
+            '/items/griffin_talon': 3000
+        },
+        'D2': {
+            '/items/sinister_essence': 1,
+            "/items/acrobats_ribbon": 2000,
+            "/items/magicians_cloth": 2000,
+            '/items/chaotic_chain': 3000,
+            '/items/cursed_ball': 3000
+        },
+        'D3': {
+            '/items/enchanted_essence': 1,
+            '/items/royal_cloth': 2000,
+            '/items/knights_ingot': 2000,
+            '/items/bishops_scroll': 2000,
+            '/items/regal_jewel': 3000,
+            '/items/sundering_jewel': 3000
+        },
+        'D4': {
+            '/items/pirate_essence': 1,
+            '/items/marksman_brooch': 2000,
+            '/items/corsair_crest': 2000,
+            '/items/damaged_anchor': 2000,
+            '/items/maelstrom_plating': 2000,
+            '/items/kraken_leather': 2000,
+            '/items/kraken_fang': 3000
+        }
+    };
 
 
 
 const lootTables = {
   'D1': [ // Chimerical Chest
-    { name: 'Chimerical Essence', probability: 100, min: 400, max: 800 },
-    { name: 'Chimerical Essence', probability: 5.0, min: 2000, max: 4000 },
+    { name: '/items/chimerical_essence', probability: 100, min: 400, max: 800 },
+    { name: '/items/chimerical_essence', probability: 5.0, min: 2000, max: 4000 },
     { name: 'Chimerical Token', probability: 100, min: 250, max: 500 },
     { name: 'Chimerical Token', probability: 5.0, min: 1500, max: 3000 },
     { name: 'Large Treasure Chest', probability: 30.0, min: 1, max: 5 },
-    { name: 'Jade', probability: 60.0, min: 5, max: 20 },
-    { name: 'Sunstone', probability: 50.0, min: 1, max: 1 },
-    { name: 'Crippling Slash', probability: 50.0, min: 1, max: 2 },
-    { name: 'Pestilent Shot', probability: 50.0, min: 1, max: 2 },
-    { name: 'Griffin Leather', probability: 10.0, min: 1, max: 1 },
-    { name: 'Manticore Sting', probability: 6.0, min: 1, max: 1 },
-    { name: 'Jackalope Antler', probability: 5.0, min: 1, max: 1 },
-    { name: 'Dodocamel Plume', probability: 2.0, min: 1, max: 1 },
-    { name: 'Griffin Talon', probability: 2.0, min: 1, max: 1 },
-    { name: 'Chimerical Chest Key', probability: 2.0, min: 1, max: 1 },
+    { name: '/items/jade', probability: 60.0, min: 5, max: 20 },
+    { name: '/items/sunstone', probability: 50.0, min: 1, max: 1 },
+    { name: '/items/crippling_slash', probability: 50.0, min: 1, max: 2 },
+    { name: '/items/pestilent_shot', probability: 50.0, min: 1, max: 2 },
+    { name: '/items/griffin_leather', probability: 10.0, min: 1, max: 1 },
+    { name: '/items/manticore_sting', probability: 6.0, min: 1, max: 1 },
+    { name: '/items/jackalope_antler', probability: 5.0, min: 1, max: 1 },
+    { name: '/items/dodocamel_plume', probability: 2.0, min: 1, max: 1 },
+    { name: '/items/griffin_talon', probability: 2.0, min: 1, max: 1 },
+    { name: '/items/chimerical_chest_key', probability: 2.0, min: 1, max: 1 },
     { name: 'Chimerical Quiver', probability: 3.0, min: 1, max: 1 },
-    { name: 'Griffin Tunic', probability: 0.3, min: 1, max: 1 },
-    { name: 'Griffin Chaps', probability: 0.3, min: 1, max: 1 },
-    { name: 'Manticore Shield', probability: 0.3, min: 1, max: 1 },
-    { name: 'Jackalope Staff', probability: 0.2, min: 1, max: 1 },
-    { name: 'Dodocamel Gauntlets', probability: 0.15, min: 1, max: 1 },
-    { name: 'Griffin Bulwark', probability: 0.05, min: 1, max: 1 }
+    { name: '/items/griffin_tunic', probability: 0.3, min: 1, max: 1 },
+    { name: '/items/griffin_chaps', probability: 0.3, min: 1, max: 1 },
+    { name: '/items/manticore_shield', probability: 0.3, min: 1, max: 1 },
+    { name: '/items/jackalope_staff', probability: 0.2, min: 1, max: 1 },
+    { name: '/items/dodocamel_gauntlets', probability: 0.15, min: 1, max: 1 },
+    { name: '/items/griffin_bulwark', probability: 0.05, min: 1, max: 1 }
   ],
+  /*
   'D2': [ // Sinister Chest
     { name: 'Sinister Essence', probability: 100.0, min: 400, max: 800 },
     { name: 'Sinister Essence', probability: 5.0, min: 2000, max: 4000 },
@@ -781,14 +792,15 @@ const lootTables = {
     { name: 'Blooming Trident', probability: 0.03, min: 1, max: 1 },
     { name: 'Blazing Trident', probability: 0.03, min: 1, max: 1 }
   ],
+  */
   'LargeTreasureChest': [
     { name: 'Coin', probability: 100, min: 30000, max: 60000 },
     { name: 'Coin', probability: 10.0, min: 150000, max: 300000 },
-    { name: 'Pearl', probability: 60.0, min: 1, max: 3 },
-    { name: 'Amber', probability: 40.0, min: 1, max: 3 },
-    { name: 'Garnet', probability: 40.0, min: 1, max: 3 },
-    { name: 'Jade', probability: 40.0, min: 1, max: 3 },
-    { name: 'Moonstone', probability: 40.0, min: 1, max: 2 }
+    { name: '/items/pearl', probability: 60.0, min: 1, max: 3 },
+    { name: '/items/amber', probability: 40.0, min: 1, max: 3 },
+    { name: '/items/garnet', probability: 40.0, min: 1, max: 3 },
+    { name: '/items/jade', probability: 40.0, min: 1, max: 3 },
+    { name: '/items/moonstone', probability: 40.0, min: 1, max: 2 }
   ]
 };
 </script>
