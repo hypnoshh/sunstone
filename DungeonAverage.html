@@ -434,10 +434,15 @@ async function fetchData() {
   const includeKeys = document.getElementById('include-keys').checked;
 
   const keyItems = {
-    'D1': ['/items/chimerical_chest_key', '/items/chimerical_entry_key'],
-    'D2': ['/items/sinister_chest_key', '/items/sinister_entry_key'],
-    'D3': ['/items/enchanted_chest_key', '/items/enchanted_entry_key'],
-    'D4': ['/items/pirate_chest_key', '/items/pirate_entry_key']
+    'D1': ['/items/chimerical_chest_key'],
+    'D2': ['/items/sinister_chest_key'],
+    'D3': ['/items/enchanted_chest_key'],
+    'D4': ['/items/pirate_chest_key'],
+    'D1 Refinement Chest': ['/items/chimerical_chest_key'],
+    'D2 Refinement Chest': ['/items/sinister_chest_key'],
+    'D3 Refinement Chest': ['/items/enchanted_chest_key'],
+    'D4 Refinement Chest': ['/items/pirate_chest_key']
+
   };
 
   for (const dungeon in lootTables) {
@@ -800,6 +805,22 @@ const lootTables = {
     { name: '/items/garnet', probability: 40.0, min: 1, max: 3 },
     { name: '/items/jade', probability: 40.0, min: 1, max: 3 },
     { name: '/items/moonstone', probability: 40.0, min: 1, max: 2 }
+  ],
+  'D1 Refinement Chest': [
+    { name: '/items/chimerical_refinement_shard', probability: 100, min: 1, max: 2 },
+    { name: '/items/chimerical_refinement_shard', probability: 5.0, min: 5, max: 10 }
+  ],
+  'D2 Refinement Chest': [
+    { name: '/items/sinister_refinement_shard', probability: 100, min: 1, max: 2 },
+    { name: '/items/sinister_refinement_shard', probability: 5.0, min: 5, max: 10 }
+  ],
+  'D3 Refinement Chest': [
+    { name: '/items/enchanted_refinement_shard', probability: 100, min: 1, max: 2 },
+    { name: '/items/enchanted_refinement_shard', probability: 5.0, min: 5, max: 10 }
+  ],
+  'D4 Refinement Chest': [
+    { name: '/items/pirate_refinement_shard', probability: 100, min: 1, max: 2 },
+    { name: '/items/pirate_refinement_shard', probability: 5.0, min: 5, max: 10 }
   ]
 };
 </script>
