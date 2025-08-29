@@ -473,6 +473,8 @@ async function fetchData() {
         }
       }
 
+      //TODO Add another if(drop.name.includes('Large Treasure Chest')) and add math to add that value - physon
+
 
       //  If it's a Token, adjust price to be based on best money/token value
       if (drop.name.includes('Token')) {
@@ -495,8 +497,6 @@ async function fetchData() {
         }
       }
 
-
-
       if ((marketItem.a === undefined || marketItem.a <= 0) && !useBidOnly) {
         if (!ignoreList.some(word => drop.name.includes(word))) {
           missingAskItems.push(drop.name);
@@ -510,6 +510,7 @@ async function fetchData() {
       allItems[drop.name] = marketItem;
     }
 
+    //Add warnings when market data is missing
     if (!hasData) {
       warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
     }
@@ -535,15 +536,19 @@ async function fetchData() {
     }
   }
 
-
+    //What was runtime set to by user?
     const runTimeMinutes = parseFloat(document.getElementById('run-time').value) || 10;
+
+    //If buff checked, multiply by 1.295
     const buffActive = document.getElementById('drop-buff').checked;
     const buffMultiplier = buffActive ? 1.295 : 1;
 
+    //Do the math to figure out profit per day
     const runsPerHour = 60 / runTimeMinutes;
     const profitPerHour = averageValue * runsPerHour * buffMultiplier;
     const profitPerDay = profitPerHour * 24;
 
+    //Round
     const formattedAverage = formatNumber(Math.abs(averageValue));
     const avgValueFormatted = averageValue < 0 
       ? `<span class="negative">-${formattedAverage}</span>` 
@@ -798,15 +803,15 @@ const lootTables = {
     { name: '/items/blooming_trident', probability: 0.03, min: 1, max: 1 },
     { name: '/items/blazing_trident', probability: 0.03, min: 1, max: 1 }
   ],
-  'LargeTreasureChest': [
-    { name: 'Coin', probability: 100, min: 30000, max: 60000 },
-    { name: 'Coin', probability: 10.0, min: 150000, max: 300000 },
-    { name: '/items/pearl', probability: 60.0, min: 1, max: 3 },
-    { name: '/items/amber', probability: 40.0, min: 1, max: 3 },
-    { name: '/items/garnet', probability: 40.0, min: 1, max: 3 },
-    { name: '/items/jade', probability: 40.0, min: 1, max: 3 },
-    { name: '/items/moonstone', probability: 40.0, min: 1, max: 2 }
-  ],
+  // 'Large Treasure Chest': [
+  //   { name: 'Coin', probability: 100, min: 30000, max: 9999960000 },
+  //   { name: 'Coin', probability: 10.0, min: 150000, max: 30099999000 },
+  //   { name: '/items/pearl', probability: 60.0, min: 1, max: 3 },
+  //   { name: '/items/amber', probability: 40.0, min: 1, max: 3 },
+  //   { name: '/items/garnet', probability: 40.0, min: 1, max: 3 },
+  //   { name: '/items/jade', probability: 40.0, min: 1, max: 3 },
+  //   { name: '/items/moonstone', probability: 40.0, min: 1, max: 2 }
+  // ],
   'D1 Refinement Chest': [
     { name: '/items/chimerical_refinement_shard', probability: 100, min: 1, max: 2 },
     { name: '/items/chimerical_refinement_shard', probability: 5.0, min: 5, max: 10 }
