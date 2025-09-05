@@ -215,7 +215,7 @@
       }
       .warning-content {
         padding: 10px;
-        display: none;
+        /*display: none; I think I'd rather just show the warnings by default - physon*/
         background-color: #fff8e1;
         border-radius: 5px;
       }
@@ -372,8 +372,7 @@
 
     <div id="warnings" class="warning">
       <button class="warning-collapsible">
-        ⚠️ Show Warnings (Some price data is missing if it hasen't been on the
-        market for 24 hours) (Click for more info)
+        ⚠️ Warnings:
       </button>
       <div class="warning-content" id="warnings-content"></div>
     </div>
@@ -385,15 +384,14 @@
 
     <div>
       <button class="collapsible">
-        Show All Items Prices (You can adjust them) (Refresh if this breaks im
-        not fixing it)
+        Show All Items Prices (You can adjust them)
       </button>
       <div class="content">
         <table id="all-items-table" style="margin-top: 10px"></table>
       </div>
     </div>
 
-    <div class="footer">Last Updated: <span id="last-updated"></span></div>
+    <div class="footer">Market data: <span id="last-updated"></span></div>
 
     <form method="post">
       <button
@@ -629,7 +627,7 @@
             warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
           }
           for (const missingItem of missingAskItems) {
-            warningsContent.innerHTML += `<div>⚠️ Missing Ask Price: ${missingItem} (${dungeon})</div>`;
+            warningsContent.innerHTML += `<div>⚠️ Missing Ask Price: ${missingItem} (${dungeon}) - using Bid Price</div>`;
           }
 
           let keyCostText = "";
@@ -686,7 +684,7 @@
               : formatNumber(profitPerDay);
 
           avgHtml += `<tr><td>${dungeon}</td><td>${avgValueFormatted}${keyCostText}</td><td>${formattedProfitHour}</td><td>${formattedProfitDay}</td></tr>`;
-
+          //Save value of Large Treasure Chests for adding to Dungeon Chest values
           if (dungeon === "Large Treasure Chest") {
             largechest = averageValue;
           }
@@ -1144,10 +1142,12 @@
       };
     </script>
     <p>
-      Fork by Physon<br />
+      Fork by physon<br />
+      PM physon in game for issues, or put in a bug on <a href="https://github.com/GoldenHoundGit/sunstone">Github</a><br />
       Big thanks and love to to: Metzil, Lurpa, miku, Joethedestroyer<br />
       Originally by
-      <a href="https://github.com/GoldenHoundGit/sunstone">GoldenHound</a><br />
+      <a href="https://github.com/GoldenHoundGit/sunstone">GoldenHound</a><br /><br />
+      <a href="https://mwilinks.site/">Milky Way Idle Link Collection</a>
     </p>
   </body>
 </html>
