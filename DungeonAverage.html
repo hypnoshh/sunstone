@@ -700,7 +700,7 @@
         for (const dungeon in lootTables) {
           allHtml += `<thead><tr><th colspan="3" style="background: var(--heading-color); color: white; font-size: 18px;">${dungeon}</th></tr>`;
           allHtml +=
-            "<tr><th>Item</th><th>Ask</th><th>Bid</th></tr></thead><tbody>";
+            "<tr><th>Item</th><th>Ask/Sell</th><th>Bid/Buy</th></tr></thead><tbody>";
 
           const drops = lootTables[dungeon] || [];
           const keys = keyItems[dungeon] || [];
