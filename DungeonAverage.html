@@ -348,10 +348,10 @@
           id="use-bid-only"
           onchange="saveSettings(); fetchDataSmooth()"
         />
-        Use Bid Price Only
+        Use Bid/Buy Price Only
         <span class="tooltip"
           >❔<span class="tooltiptext"
-            >Check to use only bid price instead of best of ask/bid.</span
+            >Check to use only bid/buy price instead of best of ask/sell. If you don't want to wait to sell.</span
           ></span
         >
       </label>
@@ -372,7 +372,7 @@
 
     <div id="warnings" class="warning">
       <button class="warning-collapsible">
-        ⚠️ Warnings:
+        Warnings:
       </button>
       <div class="warning-content" id="warnings-content"></div>
     </div>
@@ -421,7 +421,7 @@
           while (c.charAt(0) == " ") {
             c = c.substring(1);
           }
-          if (c.indexOf(name + "=") == 0) {
+          if (c.indexOf(name + "=") === 0) {
             return c.substring(name.length + 1, c.length);
           }
         }
@@ -569,6 +569,7 @@
             const type = useBidOnly ? "b" : "a";
             let price = 0;
             if (customPrices[drop.name] && customPrices[drop.name][type]) {
+              warningsContent.innerHTML += `<div>✏️ Using custom price for ${drop.name} (${dungeon})</div>`;
               price = customPrices[drop.name][type];
             } else {
               if (drop.name === "Coin") {
@@ -627,7 +628,7 @@
             warningsContent.innerHTML += `<div>⚠️ Warning: No valid market prices found for ${dungeon} items.</div>`;
           }
           for (const missingItem of missingAskItems) {
-            warningsContent.innerHTML += `<div>⚠️ Missing Ask Price: ${missingItem} (${dungeon}) - using Bid Price</div>`;
+            warningsContent.innerHTML += `<div>⚠️ No one is selling ${missingItem} (${dungeon}) - using bid/buy price for that instead</div>`;
           }
 
           let keyCostText = "";
