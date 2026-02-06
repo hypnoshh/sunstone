@@ -330,7 +330,7 @@
         <input
           type="number"
           id="run-time"
-          value="10"
+          value="30"
           min="1"
           onchange="saveSettings(); fetchDataSmooth()"
       /></label>
@@ -652,7 +652,7 @@
 
           //What was runtime set to by user?
           const runTimeMinutes =
-            parseFloat(document.getElementById("run-time").value) || 10;
+            parseFloat(document.getElementById("run-time").value) || 30;
 
           //If buff checked, multiply by 1.295
           const buffActive = document.getElementById("drop-buff").checked;
